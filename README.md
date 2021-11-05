@@ -11,7 +11,7 @@
 ### Visual Studio (Windows)
 
 Requirements:
-* [Visual Studio (from 2019 to 2005) with the Deskop C++ Environment package](https://visualstudio.microsoft.com/vs/)
+* [Visual Studio (from 2005 to 2019, whatever version fits best for you) with the Deskop C++ Environment package](https://visualstudio.microsoft.com/vs/)
 
 Once you have the requirements, go to the main folder and either open the ``"GenerateProjectWindows.bat"`` and follow the instructions,
 or open the command prompt/terminal in the folder and type:
