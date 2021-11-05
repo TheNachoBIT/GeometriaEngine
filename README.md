@@ -2,6 +2,7 @@
 
 ![Stars](https://img.shields.io/github/stars/TheNachoBIT/GeometriaEngine)
 ![Issues](https://img.shields.io/github/issues/TheNachoBIT/GeometriaEngine)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
 ## Installation
 
