@@ -1,5 +1,6 @@
 # Geometria Engine
 
+![Stars](https://img.shields.io/github/stars/TheNachoBIT/GeometriaEngine)
 ![Issues](https://img.shields.io/github/issues/TheNachoBIT/GeometriaEngine)
 
 ## Installation
