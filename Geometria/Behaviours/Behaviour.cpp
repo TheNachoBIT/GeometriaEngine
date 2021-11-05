@@ -1,0 +1,104 @@
+#include "Behaviour.h"
+
+int Hierarchy::highestScriptId = 0;
+std::vector<ScriptBehaviour*> Hierarchy::deleteList;
+std::vector<ScriptBehaviour*> Hierarchy::allScripts;
+std::vector<ScriptBehaviour*> Hierarchy::allUpdateScripts;
+bool Hierarchy::_setEditor = false;
+
+Matrix Transform::GetTransform()
+{
+	Matrix m;
+	m = Matrix(1.0f);
+	m = Matrix::Translate(m, position);
+	m = Matrix::Rotate(m, rotation);
+	m = Matrix::Scale(m, scale);
+	return m;
+}
+
+void Transform::LoadTransform()
+{
+	if (SceneSaveAndLoad::StartLoadArray("Transform"))
+	{
+		/*SceneSaveAndLoad::LoadValue(position.x, "Position X");
+		SceneSaveAndLoad::LoadValue(position.y, "Position Y");
+		SceneSaveAndLoad::LoadValue(position.z, "Position Z");
+		SceneSaveAndLoad::LoadValue(position.w, "Position W");
+
+		SceneSaveAndLoad::LoadValue(rotation.x, "Rotation X");
+		SceneSaveAndLoad::LoadValue(rotation.y, "Rotation Y");
+		SceneSaveAndLoad::LoadValue(rotation.z, "Rotation Z");
+		SceneSaveAndLoad::LoadValue(rotation.w, "Rotation W");
+
+		SceneSaveAndLoad::LoadValue(scale.x, "Scale X");
+		SceneSaveAndLoad::LoadValue(scale.y, "Scale Y");
+		SceneSaveAndLoad::LoadValue(scale.z, "Scale Z");
+		SceneSaveAndLoad::LoadValue(scale.w, "Scale W");*/
+
+		SceneSaveAndLoad::EndLoadArray();
+	}
+}
+
+void Transform::SaveTransform()
+{
+	SceneSaveAndLoad::StartSaveArray("Transform");
+
+	/*SceneSaveAndLoad::SaveValue("Position X", position.x);
+	SceneSaveAndLoad::SaveValue("Position Y", position.y);
+	SceneSaveAndLoad::SaveValue("Position Z", position.z);
+	SceneSaveAndLoad::SaveValue("Position W", position.w);
+
+	SceneSaveAndLoad::SaveValue("Rotation X", rotation.x);
+	SceneSaveAndLoad::SaveValue("Rotation Y", rotation.y);
+	SceneSaveAndLoad::SaveValue("Rotation Z", rotation.z);
+	SceneSaveAndLoad::SaveValue("Rotation W", rotation.w);
+
+	SceneSaveAndLoad::SaveValue("Scale X", scale.x);
+	SceneSaveAndLoad::SaveValue("Scale Y", scale.y);
+	SceneSaveAndLoad::SaveValue("Scale Z", scale.z);
+	SceneSaveAndLoad::SaveValue("Scale W", scale.w);*/
+
+	SceneSaveAndLoad::EndSaveArray();
+}
+
+void Hierarchy::EditorMode(bool e)
+{
+	_setEditor = e;
+}
+
+void ScriptBehaviour::AddMyselfToHierarchy()
+{
+	Hierarchy::allScripts.push_back(this);
+	scriptId = Hierarchy::highestScriptId;
+	Hierarchy::highestScriptId++;
+}
+
+void ScriptBehaviour::AddChild(ScriptBehaviour& child)
+{
+	std::cout << "Current ID: " << scriptId << std::endl;
+	scripts.push_back(&child);
+	child.hasOwner = true;
+}
+
+void Hierarchy::StartGameScripts()
+{
+	Hierarchy::allUpdateScripts.clear();
+
+	for (int i = 0; i < Hierarchy::allScripts.size(); i++)
+	{
+		Hierarchy::allScripts[i]->StartGameScript();
+	}
+}
+
+void Hierarchy::UpdateScripts()
+{
+	for (int i = 0; i < Hierarchy::allUpdateScripts.size(); i++)
+	{
+		Hierarchy::allUpdateScripts[i]->OnUpdate();
+	}
+}
+
+void Hierarchy::AddObjectToDeleteList(ScriptBehaviour* id)
+{
+	/*deleteList.push_back(id);*/
+}
