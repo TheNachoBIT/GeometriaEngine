@@ -1,6 +1,8 @@
 #pragma once
 
+#ifndef BEHAVIOUR_H
 #include "../../Behaviours/Behaviour.h"
+#endif
 
 struct TestScript : public ScriptBehaviour
 {
