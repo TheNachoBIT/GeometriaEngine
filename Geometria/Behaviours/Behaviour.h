@@ -11,11 +11,11 @@ public:
 	static int highestScriptId;
 	static std::vector<ScriptBehaviour*> deleteList;
 	static std::vector<ScriptBehaviour*> allScripts;
-	static std::vector<ScriptBehaviour*> allUpdateScripts;
+	static std::vector<ScriptBehaviour*> allUpdateScripts, allUpdateEditorScripts;
 	static bool _setEditor;
 	static void EditorMode(bool e);
 
-	static void StartGameScripts();
+	static void StartScripts();
 	static void UpdateScripts();
 	static void AddObjectToDeleteList(ScriptBehaviour* id);
 };
@@ -109,21 +109,7 @@ struct ScriptBehaviour
 
 	ScriptBehaviour* CreateNewObject(ScriptBehaviour s) { ScriptBehaviour* newScript = new ScriptBehaviour(s); newScript->OnLoad(); return newScript; }
 
-	void StartGameScript()
-	{
-		OnStartup();
-		isEditor = Hierarchy::_setEditor;
-
-		if (ClassType == Class::Object)
-		{
-			OnStart();
-
-			for (int i = 0; i < scripts.size(); i++)
-			{
-				scripts[i]->StartGameScript();
-			}
-		}
-	}
+	void StartScript();
 
 	void AddMyselfToHierarchy();
 	void AddChild(ScriptBehaviour& child);
@@ -139,7 +125,9 @@ struct ScriptBehaviour
 
 		return; 
 	}
+	virtual void OnEditorStart() { return; }
 	virtual void OnUpdate() { return; }
+	virtual void OnEditorUpdate() { return; }
 
 	virtual void OnInspector() { return; }
 };

@@ -1,9 +1,10 @@
 #include "Behaviour.h"
+#include "../Application/Application.h"
 
 int Hierarchy::highestScriptId = 0;
 std::vector<ScriptBehaviour*> Hierarchy::deleteList;
 std::vector<ScriptBehaviour*> Hierarchy::allScripts;
-std::vector<ScriptBehaviour*> Hierarchy::allUpdateScripts;
+std::vector<ScriptBehaviour*> Hierarchy::allUpdateScripts, Hierarchy::allUpdateEditorScripts;
 bool Hierarchy::_setEditor = false;
 
 Matrix Transform::GetTransform()
@@ -66,6 +67,34 @@ void Hierarchy::EditorMode(bool e)
 	_setEditor = e;
 }
 
+void ScriptBehaviour::StartScript()
+{
+	OnStartup();
+	isEditor = Hierarchy::_setEditor;
+
+	if (ClassType == Class::Object || hasOwner)
+	{
+		if (Application::_engineState == Application::State::Game)
+			OnStart();
+		else if(isEditor)
+			OnEditorStart();
+
+		if (ClassType == Class::Script)
+		{
+			if (isEditor)
+				Hierarchy::allUpdateEditorScripts.push_back(this);
+			else
+				Hierarchy::allUpdateScripts.push_back(this);
+		}
+
+		for (int i = 0; i < scripts.size(); i++)
+		{
+			scripts[i]->hasOwner = true;
+			scripts[i]->StartScript();
+		}
+	}
+}
+
 void ScriptBehaviour::AddMyselfToHierarchy()
 {
 	Hierarchy::allScripts.push_back(this);
@@ -80,21 +109,31 @@ void ScriptBehaviour::AddChild(ScriptBehaviour& child)
 	child.hasOwner = true;
 }
 
-void Hierarchy::StartGameScripts()
+void Hierarchy::StartScripts()
 {
 	Hierarchy::allUpdateScripts.clear();
 
 	for (int i = 0; i < Hierarchy::allScripts.size(); i++)
 	{
-		Hierarchy::allScripts[i]->StartGameScript();
+		Hierarchy::allScripts[i]->StartScript();
 	}
 }
 
 void Hierarchy::UpdateScripts()
 {
-	for (int i = 0; i < Hierarchy::allUpdateScripts.size(); i++)
+	if (Application::_engineState == Application::State::Game)
 	{
-		Hierarchy::allUpdateScripts[i]->OnUpdate();
+		for (int i = 0; i < Hierarchy::allUpdateScripts.size(); i++)
+		{
+			Hierarchy::allUpdateScripts[i]->OnUpdate();
+		}
+	}
+	else
+	{
+		for (int i = 0; i < Hierarchy::allUpdateEditorScripts.size(); i++)
+		{
+			Hierarchy::allUpdateEditorScripts[i]->OnEditorUpdate();
+		}
 	}
 }
 

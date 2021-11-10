@@ -1,4 +1,5 @@
 #include "Application.h"
+#include "../Behaviours/Behaviour.h"
 
 Application::State Application::_engineState;
 
@@ -19,9 +20,11 @@ bool Application::IsPlatform(Platform p)
 void Application::SetEditor()
 {
 	Application::_engineState = State::Editor;
+	Hierarchy::StartScripts();
 }
 
 void Application::SetGame()
 {	
 	Application::_engineState = State::Game;
+	Hierarchy::StartScripts();
 }
