@@ -66,11 +66,25 @@ struct ScriptBehaviour
 
 	bool _dontStore = false;
 	bool hasOwner = false;
+	ScriptBehaviour* owner;
 	std::vector<ScriptBehaviour*> scripts;
 	std::vector<ScriptBehaviour*> objectsAndPointers;
 	int scriptId = -1;
 	Transform transform;
 	std::string objectClassName;
+
+	Transform& Transform()
+	{
+		if (ClassType == Class::Script)
+		{
+			if (owner != nullptr)
+			{
+				return owner->transform;
+			}
+		}
+		
+		return transform;
+	}
 
 	std::string& Name()
 	{

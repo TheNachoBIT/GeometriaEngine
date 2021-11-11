@@ -128,6 +128,7 @@ int main(void)
 
     //This loop is the "Update" loop, which means the lines inside here will be called each frame.
     SceneManager::MainScene().MainDrawCall().allModels[0]->scripts.push_back(new TestScript());
+    SceneManager::MainScene().MainDrawCall().allModels[0]->scripts[0]->owner = SceneManager::MainScene().MainDrawCall().allModels[0];
 
     while (!Graphics::CanClose())
     {

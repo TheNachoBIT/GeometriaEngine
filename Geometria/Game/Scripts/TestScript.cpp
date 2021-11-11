@@ -9,9 +9,23 @@ void TestScript::OnStart()
 
 void TestScript::OnUpdate()
 {
-	if (Input::GetKey(GLFW_KEY_M))
+	if (Input::GetKey(GLFW_KEY_UP))
 	{
-		count++;
-		std::cout << "Counting to: " << count << std::endl;
+		Transform().position += Vector3(0, 5 * Graphics::DeltaTime(), 0);
+	}
+
+	if (Input::GetKey(GLFW_KEY_DOWN))
+	{
+		Transform().position -= Vector3(0, 5 * Graphics::DeltaTime(), 0);
+	}
+
+	if (Input::GetKey(GLFW_KEY_LEFT))
+	{
+		Transform().position -= Vector3(5 * Graphics::DeltaTime(), 0, 0);
+	}
+
+	if (Input::GetKey(GLFW_KEY_RIGHT))
+	{
+		Transform().position += Vector3(5 * Graphics::DeltaTime(), 0, 0);
 	}
 }
