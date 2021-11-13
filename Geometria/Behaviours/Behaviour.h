@@ -66,7 +66,7 @@ struct ScriptBehaviour
 
 	bool _dontStore = false;
 	bool hasOwner = false;
-	ScriptBehaviour* owner;
+	ScriptBehaviour* owner = nullptr;
 	std::vector<ScriptBehaviour*> scripts;
 	std::vector<ScriptBehaviour*> objectsAndPointers;
 	int scriptId = -1;
@@ -144,4 +144,47 @@ struct ScriptBehaviour
 	virtual void OnEditorUpdate() { return; }
 
 	virtual void OnInspector() { return; }
+
+	template <typename T>
+	T* AddScript()
+	{
+		T* script = new T();
+		int lastItem = scripts.size();
+		scripts.push_back(script);
+		scripts[lastItem]->owner = this;
+		return script;
+	}
+
+	template <typename T>
+	T* GetScript()
+	{
+		if (typeid(T) == typeid(*this))
+		{
+			if (dynamic_cast<T*>(this))
+				return (T*)this;
+		}
+		else if (owner != nullptr)
+		{
+			if (typeid(T) == typeid(*owner))
+			{
+				if (dynamic_cast<T*>(owner))
+					return (T*)owner;
+			}
+		}
+		else
+		{
+			for (int i = 0; i < scripts.size(); i++)
+			{
+				if (typeid(T) == typeid(*scripts[i]))
+				{
+					if (dynamic_cast<T*>(scripts[i]))
+					{
+						return (T*)scripts[i];
+					}
+				}
+			}
+		}
+
+		return nullptr;
+	}
 };

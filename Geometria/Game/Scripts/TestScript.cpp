@@ -11,21 +11,27 @@ void TestScript::OnUpdate()
 {
 	if (Input::GetKey(GLFW_KEY_UP))
 	{
-		GetTransform().position += Vector3(0, 5 * Graphics::DeltaTime(), 0);
+		GetTransform().position += Vector3(0, speed * Graphics::DeltaTime(), 0);
 	}
 
 	if (Input::GetKey(GLFW_KEY_DOWN))
 	{
-		GetTransform().position -= Vector3(0, 5 * Graphics::DeltaTime(), 0);
+		GetTransform().position -= Vector3(0, speed * Graphics::DeltaTime(), 0);
 	}
 
 	if (Input::GetKey(GLFW_KEY_LEFT))
 	{
-		GetTransform().position -= Vector3(5 * Graphics::DeltaTime(), 0, 0);
+		GetTransform().position -= Vector3(speed * Graphics::DeltaTime(), 0, 0);
 	}
 
 	if (Input::GetKey(GLFW_KEY_RIGHT))
 	{
-		GetTransform().position += Vector3(5 * Graphics::DeltaTime(), 0, 0);
+		GetTransform().position += Vector3(speed * Graphics::DeltaTime(), 0, 0);
 	}
+}
+
+void TestScript::ChangeSpeed()
+{
+	GetScript<Model>()->color = Color(255, 255, 0, 1);
+	std::cout << "Color Changed!" << std::endl;
 }

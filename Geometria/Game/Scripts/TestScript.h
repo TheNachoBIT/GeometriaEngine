@@ -9,5 +9,7 @@ struct TestScript : public ScriptBehaviour
 	void OnStart();
 	void OnUpdate();
 
-	int count = 0;
+	int speed = 5;
+
+	void ChangeSpeed();
 };
