@@ -73,7 +73,7 @@ struct ScriptBehaviour
 	Transform transform;
 	std::string objectClassName;
 
-	Transform& Transform()
+	Transform& GetTransform()
 	{
 		if (ClassType == Class::Script)
 		{

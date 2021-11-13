@@ -11,21 +11,21 @@ void TestScript::OnUpdate()
 {
 	if (Input::GetKey(GLFW_KEY_UP))
 	{
-		Transform().position += Vector3(0, 5 * Graphics::DeltaTime(), 0);
+		GetTransform().position += Vector3(0, 5 * Graphics::DeltaTime(), 0);
 	}
 
 	if (Input::GetKey(GLFW_KEY_DOWN))
 	{
-		Transform().position -= Vector3(0, 5 * Graphics::DeltaTime(), 0);
+		GetTransform().position -= Vector3(0, 5 * Graphics::DeltaTime(), 0);
 	}
 
 	if (Input::GetKey(GLFW_KEY_LEFT))
 	{
-		Transform().position -= Vector3(5 * Graphics::DeltaTime(), 0, 0);
+		GetTransform().position -= Vector3(5 * Graphics::DeltaTime(), 0, 0);
 	}
 
 	if (Input::GetKey(GLFW_KEY_RIGHT))
 	{
-		Transform().position += Vector3(5 * Graphics::DeltaTime(), 0, 0);
+		GetTransform().position += Vector3(5 * Graphics::DeltaTime(), 0, 0);
 	}
 }
