@@ -108,7 +108,8 @@ public:
 		MenuItem,
 		HelpMarker,
 		FileSearch,
-		Guizmo
+		Guizmo,
+		DragInt
 	};
 
 	GUIType guiType = GUIType::None;
@@ -248,6 +249,7 @@ public:
 	ImGUIElement(GUIType gT, ImGUIElement& owner, float* floatR);
 	ImGUIElement(GUIType gT, ImGUIElement& owner, float* floatR, float min, float max);
 	ImGUIElement(GUIType gT, ImGUIElement& owner, std::string t);
+	ImGUIElement(GUIType gT, ImGUIElement& owner, std::string t, int* iR);
 	ImGUIElement(GUIType gT, ImGUIElement& owner, std::string t, std::string t2);
 	ImGUIElement(GUIType gT, ImGUIElement& owner, std::string t, Vector4* v4r);
 	ImGUIElement(GUIType gT, ImGUIElement& owner, std::string t, std::string* targ);

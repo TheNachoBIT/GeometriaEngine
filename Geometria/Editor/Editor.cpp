@@ -15,7 +15,7 @@ bool Editor::fBFileMode = false;
 std::string Editor::fBFileModeVar, Editor::fBFileModeObj;
 
 ImGUIElement* Editor::Inspector, * Editor::FileBrowser, * Editor::HierarchyWindow, * Editor::CurrentFileModeObject, * Editor::MainMenuBar,
-* Editor::InspBar, * Editor::HierBar, * Editor::FileBrBar, * Editor::EditorGuizmo, * Editor::EditorRightClick, 
+* Editor::InspBar, * Editor::HierBar, * Editor::FileBrBar, * Editor::EditorGuizmo, * Editor::EditorRightClick, * Editor::AddScriptWindow, 
 
 * Editor::GameViewButton, * Editor::EditorViewButton;
 
@@ -384,6 +384,35 @@ void Editor::HierarchyBegin()
 
 }
 
+void Inspector_AttachNewScriptToObject(ScriptBehaviour* thing)
+{
+	int size = selectedObject->scripts.size();
+	selectedObject->scripts.push_back(thing->Clone());
+	selectedObject->scripts[size]->owner = selectedObject;
+	Inspector_Refresh();
+	std::cout << "Added " << typeid(*selectedObject->scripts[size]).name() << "! Current Size: " << selectedObject->scripts.size() << std::endl;
+	Editor::AddScriptWindow->Delete();
+	Editor::AddScriptWindow->isOpen = false;
+}
+
+void Inspector_AddScript()
+{
+	Hierarchy::EditorMode(true);
+	bool add = Editor::AddScriptWindow == nullptr;
+	Editor::AddScriptWindow = new ImGUIElement(ImGUIElement::GUIType::Window, "Add New Script");
+	Editor::AddScriptWindow->isOpen = true;
+	Editor::AddScriptWindow->Move(Vector2(Graphics::MousePosition().x, Graphics::MousePosition().y));
+	
+	for (int i = 0; i < Hierarchy::scriptsWithVisualAccess.size(); i++)
+	{
+		ImGUIElement* button = new ImGUIElement(ImGUIElement::GUIType::ListButton, *Editor::AddScriptWindow, Hierarchy::scriptsWithVisualAccess[i].first);
+		button->OnClick(std::bind(Inspector_AttachNewScriptToObject, Hierarchy::scriptsWithVisualAccess[i].second));
+	}
+
+	RendererCore::AddImGUIElement(*Editor::AddScriptWindow, Editor::editorDrawCall->Target());
+	Hierarchy::EditorMode(false);
+}
+
 void Editor::InspectorBegin()
 {
 	Hierarchy::EditorMode(true);
@@ -413,6 +442,11 @@ void Editor::InspectorBegin()
 		{
 			selectedObject->scripts[i]->OnInspector();
 		}
+
+		ImGUIElement* newLine = new ImGUIElement(ImGUIElement::GUIType::Text, *Inspector, "");
+		ImGUIElement* addScriptButton = new ImGUIElement(ImGUIElement::GUIType::Button, *Inspector, "Add Script");
+		addScriptButton->Alignment = ImGUIElement::AlignTo::Center;
+		addScriptButton->OnClick([&] { Inspector_AddScript(); });
 	}
 
 	RendererCore::AddImGUIElement(*Inspector, editorDrawCall->Target());

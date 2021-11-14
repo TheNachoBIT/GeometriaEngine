@@ -8,7 +8,7 @@ public:
 	static DrawCall* editorDrawCall;
 
 	static ImGUIElement* Inspector, *FileBrowser, *HierarchyWindow, *CurrentFileModeObject, *MainMenuBar,
-		*InspBar, *HierBar, *FileBrBar, *EditorGuizmo, *EditorRightClick;
+		*InspBar, *HierBar, *FileBrBar, *EditorGuizmo, *EditorRightClick, *AddScriptWindow;
 
 	static ImGUIElement* EditorViewButton, * GameViewButton;
 

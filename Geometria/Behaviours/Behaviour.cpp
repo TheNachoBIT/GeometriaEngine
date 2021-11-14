@@ -5,6 +5,7 @@ int Hierarchy::highestScriptId = 0;
 std::vector<ScriptBehaviour*> Hierarchy::deleteList;
 std::vector<ScriptBehaviour*> Hierarchy::allScripts;
 std::vector<ScriptBehaviour*> Hierarchy::allUpdateScripts, Hierarchy::allUpdateEditorScripts;
+std::vector<std::pair<std::string, ScriptBehaviour*>> Hierarchy::scriptsWithVisualAccess;
 bool Hierarchy::_setEditor = false;
 
 Matrix Transform::GetTransform()
@@ -71,6 +72,8 @@ void ScriptBehaviour::StartScript()
 {
 	OnStartup();
 	isEditor = Hierarchy::_setEditor;
+
+	OnInternal();
 
 	if (ClassType == Class::Object || hasOwner)
 	{

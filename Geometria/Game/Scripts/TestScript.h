@@ -6,8 +6,11 @@
 
 struct TestScript : public ScriptBehaviour
 {
+	AllowCloning(TestScript)
+
 	void OnStart();
 	void OnUpdate();
+	void OnInspector();
 
 	int speed = 5;
 

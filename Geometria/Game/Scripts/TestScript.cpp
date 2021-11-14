@@ -1,6 +1,9 @@
 #include "TestScript.h"
 #include "../../geometria.h"
 #include <iostream>
+#include "../../Editor/Editor.h"
+
+VisualAccess(TestScript)
 
 void TestScript::OnStart()
 {
@@ -28,6 +31,15 @@ void TestScript::OnUpdate()
 	{
 		GetTransform().position += Vector3(speed * Graphics::DeltaTime(), 0, 0);
 	}
+}
+
+void TestScript::OnInspector()
+{
+	std::cout << "Accessing Inspector!" << std::endl;
+	ImGUIElement* NewLine = new ImGUIElement(ImGUIElement::GUIType::Text, *Editor::Inspector, "");
+	ImGUIElement* title = new ImGUIElement(ImGUIElement::GUIType::Text, *Editor::Inspector, "Test Script");
+	ImGUIElement* speedInput = new ImGUIElement(ImGUIElement::GUIType::DragInt, *Editor::Inspector, "Speed", &speed);
+	title->Alignment = ImGUIElement::AlignTo::Center;
 }
 
 void TestScript::ChangeSpeed()

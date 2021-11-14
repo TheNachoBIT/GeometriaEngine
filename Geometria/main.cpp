@@ -157,11 +157,13 @@ int main(void)
             {
             case Application::State::Game:
                 Application::SetEditor();
+                Editor::SwitchEditorView();
                 std::cout << "State: Editing..." << std::endl;
                 break;
 
             case Application::State::Editor:
                 Application::SetGame();
+                Editor::SwitchGameView();
                 std::cout << "State: Gaming..." << std::endl;
                 break;
             }

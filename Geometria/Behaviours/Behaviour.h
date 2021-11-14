@@ -12,6 +12,7 @@ public:
 	static std::vector<ScriptBehaviour*> deleteList;
 	static std::vector<ScriptBehaviour*> allScripts;
 	static std::vector<ScriptBehaviour*> allUpdateScripts, allUpdateEditorScripts;
+	static std::vector<std::pair<std::string, ScriptBehaviour*>> scriptsWithVisualAccess;
 	static bool _setEditor;
 	static void EditorMode(bool e);
 
@@ -35,6 +36,20 @@ struct Transform
 	void LoadTransform();
 	void SaveTransform();
 };
+
+#define VisualAccess(x) bool _SB_GetVisualAccess()\
+{\
+	Hierarchy::scriptsWithVisualAccess.push_back(std::make_pair(#x, new x()));\
+	Hierarchy::allScripts.pop_back();\
+	return true;\
+}\
+\
+bool _SB_VisualAccess = _SB_GetVisualAccess();
+
+#define AllowCloning(x) ScriptBehaviour* Clone()\
+{\
+	return new x(static_cast<x>(*this));\
+}
 
 #define SaveExternalScripts(x) std::cout << "Saving " << #x << " with size of " << x.size() << std::endl; for(int i = 0; i < x.size(); i++) { x[i]->OnSave(); }
 
@@ -121,6 +136,8 @@ struct ScriptBehaviour
 	virtual void OnLoad() { return; }
 	virtual void OnSave() { return; }
 
+	virtual ScriptBehaviour* Clone() { return nullptr; };
+
 	ScriptBehaviour* CreateNewObject(ScriptBehaviour s) { ScriptBehaviour* newScript = new ScriptBehaviour(s); newScript->OnLoad(); return newScript; }
 
 	void StartScript();
@@ -130,6 +147,7 @@ struct ScriptBehaviour
 	void RemoveMyselfFromHierarchy() { Hierarchy::allScripts.erase(Hierarchy::allScripts.begin() + scriptId); }
 
 	virtual void OnStartup() { return; }
+	virtual void OnInternal() { return; }
 	virtual void OnStart() 
 	{
 		if (ClassType == Class::Script)
