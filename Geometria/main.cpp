@@ -1,5 +1,6 @@
 #include "geometria.h"
 #include "Editor/Editor.h"
+#include "Game/GuisFirstScene.h"
 #include "Game/SceneTest.h"
 #include "Game/SampleScene.tits.h"
 
@@ -10,7 +11,7 @@ bool firstFrame = true, secondFrame = true;
 int main(void)
 {
     Graphics::Init();
-    Graphics::CreateWindow(640, 480, "Yooooooooooooooo");
+    Graphics::CreateWindow(640, 480, "what the hell is wrong with my life");
 
     Graphics::Start();
 
