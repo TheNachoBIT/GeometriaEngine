@@ -84,6 +84,12 @@ ImGUIElement::ImGUIElement(GUIType gT, ImGUIElement& owner, std::string t) : gui
 	this->owner = &owner;
 }
 
+ImGUIElement::ImGUIElement(GUIType gT, ImGUIElement& owner, std::string t, int* iR) : guiType(gT), text(t), iRef(iR)
+{
+	owner.allElements.push_back(this);
+	this->owner = &owner;
+}
+
 ImGUIElement::ImGUIElement(GUIType gT, ImGUIElement& owner, std::string t, std::string t2) : guiType(gT), text(t), secondText(t2)
 {
 	owner.allElements.push_back(this);
@@ -295,6 +301,10 @@ void ImGUIElement::OnUpdate()
 		case GUIType::DragVector3:
 			ImGui::DragFloat3(textFinal.c_str(), (float*)v4ref, 0.01f);
 			v4ref->SendChangeEvent();
+			break;
+
+		case GUIType::DragInt:
+			ImGui::DragInt(textFinal.c_str(), iRef, 0.1f);
 			break;
 
 		case GUIType::InputField:

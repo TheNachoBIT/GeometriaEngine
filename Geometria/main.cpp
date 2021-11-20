@@ -3,6 +3,8 @@
 #include "Game/GuisFirstScene.h"
 #include "Game/SceneTest.h"
 #include "Game/SampleScene.tits.h"
+#include "Application/Application.h"
+#include "Game/Scripts/TestScript.h"
 
 //Original name: Chingatumadre Engine
 
@@ -111,7 +113,7 @@ int main(void)
 
     RendererCore::Start();
 
-    Hierarchy::StartGameScripts();
+    Application::SetEditor();
 
     //SceneSaveAndLoad::StartSceneSave(&SceneManager::MainScene());
 
@@ -126,6 +128,7 @@ int main(void)
     int sensitivity = 3;
 
     //This loop is the "Update" loop, which means the lines inside here will be called each frame.
+
     while (!Graphics::CanClose())
     {
         Input::UpdateKeyState();
@@ -147,6 +150,24 @@ int main(void)
                 glfwSetInputMode(Graphics::GetMainWindow().openGLWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             else
                 glfwSetInputMode(Graphics::GetMainWindow().openGLWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+
+        if (Input::GetKeyDown(GLFW_KEY_P))
+        {
+            switch (Application::_engineState)
+            {
+            case Application::State::Game:
+                Application::SetEditor();
+                Editor::SwitchEditorView();
+                std::cout << "State: Editing..." << std::endl;
+                break;
+
+            case Application::State::Editor:
+                Application::SetGame();
+                Editor::SwitchGameView();
+                std::cout << "State: Gaming..." << std::endl;
+                break;
+            }
         }
 
         if (!stopCamera)

@@ -11,11 +11,12 @@ public:
 	static int highestScriptId;
 	static std::vector<ScriptBehaviour*> deleteList;
 	static std::vector<ScriptBehaviour*> allScripts;
-	static std::vector<ScriptBehaviour*> allUpdateScripts;
+	static std::vector<ScriptBehaviour*> allUpdateScripts, allUpdateEditorScripts;
+	static std::vector<std::pair<std::string, ScriptBehaviour*>> scriptsWithVisualAccess;
 	static bool _setEditor;
 	static void EditorMode(bool e);
 
-	static void StartGameScripts();
+	static void StartScripts();
 	static void UpdateScripts();
 	static void AddObjectToDeleteList(ScriptBehaviour* id);
 };
@@ -35,6 +36,20 @@ struct Transform
 	void LoadTransform();
 	void SaveTransform();
 };
+
+#define VisualAccess(x) bool _SB_GetVisualAccess()\
+{\
+	Hierarchy::scriptsWithVisualAccess.push_back(std::make_pair(#x, new x()));\
+	Hierarchy::allScripts.pop_back();\
+	return true;\
+}\
+\
+bool _SB_VisualAccess = _SB_GetVisualAccess();
+
+#define AllowCloning(x) ScriptBehaviour* Clone()\
+{\
+	return new x(static_cast<x>(*this));\
+}
 
 #define SaveExternalScripts(x) std::cout << "Saving " << #x << " with size of " << x.size() << std::endl; for(int i = 0; i < x.size(); i++) { x[i]->OnSave(); }
 
@@ -66,11 +81,25 @@ struct ScriptBehaviour
 
 	bool _dontStore = false;
 	bool hasOwner = false;
+	ScriptBehaviour* owner = nullptr;
 	std::vector<ScriptBehaviour*> scripts;
 	std::vector<ScriptBehaviour*> objectsAndPointers;
 	int scriptId = -1;
 	Transform transform;
 	std::string objectClassName;
+
+	Transform& GetTransform()
+	{
+		if (ClassType == Class::Script)
+		{
+			if (owner != nullptr)
+			{
+				return owner->transform;
+			}
+		}
+		
+		return transform;
+	}
 
 	std::string& Name()
 	{
@@ -107,29 +136,18 @@ struct ScriptBehaviour
 	virtual void OnLoad() { return; }
 	virtual void OnSave() { return; }
 
+	virtual ScriptBehaviour* Clone() { return nullptr; };
+
 	ScriptBehaviour* CreateNewObject(ScriptBehaviour s) { ScriptBehaviour* newScript = new ScriptBehaviour(s); newScript->OnLoad(); return newScript; }
 
-	void StartGameScript()
-	{
-		OnStartup();
-		isEditor = Hierarchy::_setEditor;
-
-		if (ClassType == Class::Object)
-		{
-			OnStart();
-
-			for (int i = 0; i < scripts.size(); i++)
-			{
-				scripts[i]->StartGameScript();
-			}
-		}
-	}
+	void StartScript();
 
 	void AddMyselfToHierarchy();
 	void AddChild(ScriptBehaviour& child);
 	void RemoveMyselfFromHierarchy() { Hierarchy::allScripts.erase(Hierarchy::allScripts.begin() + scriptId); }
 
 	virtual void OnStartup() { return; }
+	virtual void OnInternal() { return; }
 	virtual void OnStart() 
 	{
 		if (ClassType == Class::Script)
@@ -139,7 +157,52 @@ struct ScriptBehaviour
 
 		return; 
 	}
+	virtual void OnEditorStart() { return; }
 	virtual void OnUpdate() { return; }
+	virtual void OnEditorUpdate() { return; }
 
 	virtual void OnInspector() { return; }
+
+	template <typename T>
+	T* AddScript()
+	{
+		T* script = new T();
+		int lastItem = scripts.size();
+		scripts.push_back(script);
+		scripts[lastItem]->owner = this;
+		return script;
+	}
+
+	template <typename T>
+	T* GetScript()
+	{
+		if (typeid(T) == typeid(*this))
+		{
+			if (dynamic_cast<T*>(this))
+				return (T*)this;
+		}
+		else if (owner != nullptr)
+		{
+			if (typeid(T) == typeid(*owner))
+			{
+				if (dynamic_cast<T*>(owner))
+					return (T*)owner;
+			}
+		}
+		else
+		{
+			for (int i = 0; i < scripts.size(); i++)
+			{
+				if (typeid(T) == typeid(*scripts[i]))
+				{
+					if (dynamic_cast<T*>(scripts[i]))
+					{
+						return (T*)scripts[i];
+					}
+				}
+			}
+		}
+
+		return nullptr;
+	}
 };
