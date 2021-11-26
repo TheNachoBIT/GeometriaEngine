@@ -1,5 +1,6 @@
 #include "SampleScene.tits.h"
-#include "../geometria.h"
+#include "geometria.h"
+#include "../Physics/PhysicsManager.h"
 
 Model* Model126;
 

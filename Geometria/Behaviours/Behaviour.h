@@ -10,11 +10,13 @@ class Hierarchy
 public:
 	static int highestScriptId;
 	static std::vector<ScriptBehaviour*> deleteList;
-	static std::vector<ScriptBehaviour*> allScripts;
+	static std::vector<ScriptBehaviour*> allScripts, allStaticScripts;
 	static std::vector<ScriptBehaviour*> allUpdateScripts, allUpdateEditorScripts;
 	static std::vector<std::pair<std::string, ScriptBehaviour*>> scriptsWithVisualAccess;
+	static std::vector<std::string> listOfStaticScripts;
 	static bool _setEditor;
 	static void EditorMode(bool e);
+
 
 	static void StartScripts();
 	static void UpdateScripts();
@@ -37,19 +39,51 @@ struct Transform
 	void SaveTransform();
 };
 
-#define VisualAccess(x) bool _SB_GetVisualAccess()\
+#define VisualAccess(x) bool _SB_GetVisualAccessOf##x()\
 {\
 	Hierarchy::scriptsWithVisualAccess.push_back(std::make_pair(#x, new x()));\
 	Hierarchy::allScripts.pop_back();\
 	return true;\
 }\
 \
-bool _SB_VisualAccess = _SB_GetVisualAccess();
+bool _SB_VisualAccessOf##x = _SB_GetVisualAccessOf##x();
 
 #define AllowCloning(x) ScriptBehaviour* Clone()\
 {\
 	return new x(static_cast<x>(*this));\
 }
+
+#define RequireStaticScript(x)\
+bool _SB_Found##x = false;\
+for (int i = 0; i < Hierarchy::listOfStaticScripts.size(); i++)\
+{\
+	if (Hierarchy::listOfStaticScripts[i] == #x)\
+	{\
+		_SB_Found##x = true;\
+		break;\
+	}\
+}\
+\
+if (!_SB_Found##x)\
+{\
+	Hierarchy::allScripts.push_back(new x());\
+	Hierarchy::allScripts.pop_back();\
+	Hierarchy::allScripts[Hierarchy::allScripts.size() - 1]->ClassType = ScriptBehaviour::Class::Static;\
+	Hierarchy::allScripts[Hierarchy::allScripts.size() - 1]->StartScript();\
+	Hierarchy::listOfStaticScripts.push_back(#x);\
+}
+
+#define VisualAccess_Title(x)\
+ImGUIElement* NewLine = new ImGUIElement(ImGUIElement::GUIType::Text, *Editor::Inspector, "");\
+ImGUIElement* title = new ImGUIElement(ImGUIElement::GUIType::Text, *Editor::Inspector, #x);\
+title->Alignment = ImGUIElement::AlignTo::Center
+
+#define VisualAccess_AddValue(type, name, value)\
+ImGUIElement* _In##name = new ImGUIElement(ImGUIElement::GUIType::type, *Editor::Inspector, #name, value)
+
+#define VisualAccess_AddEditUIValue(nameOfUI, type, name, value)\
+ImGUIElement* nameOfUI = new ImGUIElement(ImGUIElement::GUIType::type, *Editor::Inspector, #name, value)
+
 
 #define SaveExternalScripts(x) std::cout << "Saving " << #x << " with size of " << x.size() << std::endl; for(int i = 0; i < x.size(); i++) { x[i]->OnSave(); }
 
@@ -94,7 +128,7 @@ struct ScriptBehaviour
 		{
 			if (owner != nullptr)
 			{
-				return owner->transform;
+				return owner->GetTransform();
 			}
 		}
 		
@@ -113,7 +147,8 @@ struct ScriptBehaviour
 	{
 		Script,
 		Object,
-		Pointer
+		Pointer,
+		Static
 	};
 
 	Class ClassType = Class::Script;
@@ -150,7 +185,7 @@ struct ScriptBehaviour
 	virtual void OnInternal() { return; }
 	virtual void OnStart() 
 	{
-		if (ClassType == Class::Script)
+		if (ClassType == Class::Script || ClassType == Class::Static)
 		{
 			Hierarchy::allUpdateScripts.push_back(this);
 		}
@@ -176,18 +211,14 @@ struct ScriptBehaviour
 	template <typename T>
 	T* GetScript()
 	{
-		if (typeid(T) == typeid(*this))
+		if (owner != nullptr)
+		{
+			return owner->GetScript<T>();
+		}
+		else if (typeid(T) == typeid(*this))
 		{
 			if (dynamic_cast<T*>(this))
 				return (T*)this;
-		}
-		else if (owner != nullptr)
-		{
-			if (typeid(T) == typeid(*owner))
-			{
-				if (dynamic_cast<T*>(owner))
-					return (T*)owner;
-			}
 		}
 		else
 		{

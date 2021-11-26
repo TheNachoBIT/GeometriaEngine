@@ -130,12 +130,10 @@ void Model::OnSave()
 
 void Model::OnInspector()
 {
-	ImGUIElement* NewLine = new ImGUIElement(ImGUIElement::GUIType::Text, *Editor::Inspector, "");
-	ImGUIElement* title = new ImGUIElement(ImGUIElement::GUIType::Text, *Editor::Inspector, "Model");
-	title->Alignment = ImGUIElement::AlignTo::Center;
+	VisualAccess_Title(Model);
 
-	ImGUIElement* colorButton = new ImGUIElement(ImGUIElement::GUIType::ColorEditorButtonRGBA, *Editor::Inspector, "Color", &color);
-	ImGUIElement* textureButton = new ImGUIElement(ImGUIElement::GUIType::FileSearch, *Editor::Inspector, "Texture", "No Texture Selected");
+	VisualAccess_AddValue(ColorEditorButtonRGBA, Color, &color);
+	VisualAccess_AddEditUIValue(textureButton, FileSearch, Texture, "No Texture Selected");
 
 	if(texture != nullptr)
 		textureButton->storedPath = texture->filename;

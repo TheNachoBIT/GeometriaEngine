@@ -1,7 +1,7 @@
 project "GLEW"
 	kind "StaticLib"
 	language "C"
-	staticruntime "off"
+	staticruntime "on"
 
 	files
 	{

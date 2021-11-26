@@ -1,7 +1,8 @@
 #include "TestScript.h"
-#include "../../geometria.h"
 #include <iostream>
 #include "../../Editor/Editor.h"
+#include "../../Physics/PhysicsManager.h"
+#include "../../Physics/Rigidbody/Rigidbody.h"
 
 VisualAccess(TestScript)
 
@@ -12,34 +13,16 @@ void TestScript::OnStart()
 
 void TestScript::OnUpdate()
 {
-	if (Input::GetKey(GLFW_KEY_UP))
+	if (Input::GetKeyDown(GLFW_KEY_SPACE))
 	{
-		GetTransform().position += Vector3(0, speed * Graphics::DeltaTime(), 0);
-	}
-
-	if (Input::GetKey(GLFW_KEY_DOWN))
-	{
-		GetTransform().position -= Vector3(0, speed * Graphics::DeltaTime(), 0);
-	}
-
-	if (Input::GetKey(GLFW_KEY_LEFT))
-	{
-		GetTransform().position -= Vector3(speed * Graphics::DeltaTime(), 0, 0);
-	}
-
-	if (Input::GetKey(GLFW_KEY_RIGHT))
-	{
-		GetTransform().position += Vector3(speed * Graphics::DeltaTime(), 0, 0);
+		GetScript<Rigidbody>()->GetRigidbodyTransform().position = Vector3(0, 0, 0);
 	}
 }
 
 void TestScript::OnInspector()
 {
-	std::cout << "Accessing Inspector!" << std::endl;
-	ImGUIElement* NewLine = new ImGUIElement(ImGUIElement::GUIType::Text, *Editor::Inspector, "");
-	ImGUIElement* title = new ImGUIElement(ImGUIElement::GUIType::Text, *Editor::Inspector, "Test Script");
-	ImGUIElement* speedInput = new ImGUIElement(ImGUIElement::GUIType::DragInt, *Editor::Inspector, "Speed", &speed);
-	title->Alignment = ImGUIElement::AlignTo::Center;
+	VisualAccess_Title(TestScript);
+	VisualAccess_AddValue(DragInt, Speed, &speed);
 }
 
 void TestScript::ChangeSpeed()

@@ -1,5 +1,5 @@
 #include "Editor.h"
-#include "../geometria.h"
+#include "geometria.h"
 
 DrawCall* Editor::editorDrawCall;
 

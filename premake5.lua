@@ -1,4 +1,5 @@
 workspace "Geometria"
+	staticruntime "on"
 	configurations { "Release" }
 	platforms { "x86_64", "x86" }
 	startproject "Geometria"
@@ -13,6 +14,10 @@ IncludeDirectories["GLEW"] = "Libraries/GLEW/GLEWCore/include"
 
 include "Libraries/YAMLCPP"
 IncludeDirectories["YAMLCPP"] = "Libraries/YAMLCPP/YAMLCPPCore/include"
+
+IncludeDirectories["NVIDIAPHYSX"] = "Libraries/NVIDIAPHYSX/include"
+IncludeDirectories["NVIDIAPHYSXSHARED"] = "Libraries/NVIDIAPHYSX/pxshared/include"
+
 
 project "Geometria"
 	kind "ConsoleApp"
@@ -30,9 +35,13 @@ project "Geometria"
 	includedirs
 	{
 		"Libraries/include",
+		"Geometria/Behaviours",
+		"Geometria/MainHeader",
 		"%{IncludeDirectories.GLFW}",
 		"%{IncludeDirectories.GLEW}",
-		"%{IncludeDirectories.YAMLCPP}"
+		"%{IncludeDirectories.YAMLCPP}",
+		"%{IncludeDirectories.NVIDIAPHYSX}",
+		"%{IncludeDirectories.NVIDIAPHYSXSHARED}"
 	}
 	
 	filter "system:windows"
@@ -41,7 +50,22 @@ project "Geometria"
 	    	"GLFW",
 			"GLEW",
 			"yaml-cpp",
-			"opengl32.lib"
+			"opengl32.lib",
+
+			-- NVIDIA PhysX Libraries --
+			"Libraries/NVIDIAPHYSX/binaries/Win64/LowLevel_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/LowLevelAABB_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/LowLevelDynamics_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysX_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysXCharacterKinematic_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysXCommon_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysXCooking_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysXExtensions_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysXFoundation_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysXPvdSDK_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysXVehicle_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/SceneQuery_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/SimulationController_static_64.lib"
 	   }
 
 	filter "system:linux"

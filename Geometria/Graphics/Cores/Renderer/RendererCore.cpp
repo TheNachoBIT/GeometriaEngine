@@ -271,7 +271,7 @@ void RendererCore::OpenGL_Start_DrawCall(DrawCall& d)
 			std::cout << "I'm not on Windows! Yaaaayyyyy! :D" << std::endl;
 		}
 
-		if (!Graphics::IsIntelGPU() || !Application::IsPlatform(Application::Platform::Windows))
+		if (!Graphics::IsIntelGPU() || !Application::IsPlatform(Application::Platform::Windows) || Graphics::IsIntelGPUBypassed())
 		{
 			glVertexAttribPointer(pointerPosition, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
 			glEnableVertexAttribArray(pointerPosition);

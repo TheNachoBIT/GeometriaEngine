@@ -4,17 +4,32 @@
 #include "Game/SampleScene.tits.h"
 #include "Application/Application.h"
 #include "Game/Scripts/TestScript.h"
+#include "Physics/PhysicsManager.h"
 
 //Original name: Chingatumadre Engine
 
 static std::vector<Model*> models;
 bool firstFrame = true, secondFrame = true;
-int main(void)
+int main(int argc, char** argv)
 {
     Graphics::Init();
     Graphics::CreateWindow(640, 480, "Yooooooooooooooo");
 
     Graphics::Start();
+
+    for (int i = 0; i < argc; i++)
+    {
+        std::string commandLine = argv[i];
+        if (commandLine == "--bypass-intel")
+        {
+            Graphics::BypassIntel(true);
+        }
+    }
+
+    if (Graphics::IsIntelGPUBypassed())
+    {
+        std::cout << "Intel GPU Bypassed!" << std::endl;
+    }
 
     Graphics::MainCamera() = new Camera(Vector3(0, 0, 2), 70.0f, (float)Graphics::GetMainWindow().width / (float)Graphics::GetMainWindow().height, 0.1f, 1000.0f);
     Graphics::MainCamera()->objectClassName = "Main Camera";
@@ -115,6 +130,8 @@ int main(void)
     Application::SetEditor();
 
     //SceneSaveAndLoad::StartSceneSave(&SceneManager::MainScene());
+
+    //SceneTest::Init();
 
     Editor::Begin();
 
@@ -265,5 +282,6 @@ int main(void)
     }
 
     Graphics::Exit();
+    exit(0);
     return 0;
 }
