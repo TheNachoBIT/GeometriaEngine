@@ -45,6 +45,7 @@ project "Geometria"
 	}
 	
 	filter "system:windows"
+
 	   links
 	   {
 	    	"GLFW",
@@ -78,7 +79,17 @@ project "Geometria"
 			"pthread",
 			"m",
 			"dl",
-			"stdc++fs"
+			"stdc++fs",
+
+			-- NVIDIA PhysX Libraries --
+			"Libraries/NVIDIAPHYSX/binaries/Linux/PhysX_static_64",
+			"Libraries/NVIDIAPHYSX/binaries/Linux/PhysXExtensions_static_64",
+			"Libraries/NVIDIAPHYSX/binaries/Linux/PhysXCharacterKinematic_static_64",
+			"Libraries/NVIDIAPHYSX/binaries/Linux/PhysXCooking_static_64",
+			"Libraries/NVIDIAPHYSX/binaries/Linux/PhysXFoundation_static_64",
+			"Libraries/NVIDIAPHYSX/binaries/Linux/PhysXVehicle_static_64",
+			"Libraries/NVIDIAPHYSX/binaries/Linux/PhysXPvdSDK_static_64",
+			"Libraries/NVIDIAPHYSX/binaries/Linux/PhysXCommon_static_64"
 	   }
 
 	filter "configurations:Release"
