@@ -108,7 +108,6 @@ void ScriptBehaviour::AddMyselfToHierarchy()
 
 void ScriptBehaviour::AddChild(ScriptBehaviour& child)
 {
-	std::cout << "Current ID: " << scriptId << std::endl;
 	scripts.push_back(&child);
 	child.hasOwner = true;
 }

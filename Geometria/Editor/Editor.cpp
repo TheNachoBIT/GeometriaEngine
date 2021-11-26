@@ -266,16 +266,22 @@ void Editor::Begin()
 
 void Editor::SwitchEditorView()
 {
-	Editor::EditorViewButton->colorRef = new Color(1, 0.9, 0);
-	Editor::GameViewButton->colorRef = new Color(Color::white());
-	Graphics::MainCamera()->editorModeCamera = true;
+	if (editorDrawCall != nullptr)
+	{
+		Editor::EditorViewButton->colorRef = new Color(1, 0.9, 0);
+		Editor::GameViewButton->colorRef = new Color(Color::white());
+		Graphics::MainCamera()->editorModeCamera = true;
+	}
 }
 
 void Editor::SwitchGameView()
 {
-	Editor::EditorViewButton->colorRef = new Color(Color::white());
-	Editor::GameViewButton->colorRef = new Color(1, 0.9, 0);
-	Graphics::MainCamera()->editorModeCamera = false;
+	if (editorDrawCall != nullptr)
+	{
+		Editor::EditorViewButton->colorRef = new Color(Color::white());
+		Editor::GameViewButton->colorRef = new Color(1, 0.9, 0);
+		Graphics::MainCamera()->editorModeCamera = false;
+	}
 }
 
 void Editor::MainMenuBarBegin()

@@ -50,7 +50,6 @@ void RendererCore::AddModel(Model& m, DrawCall& d)
 {
 	d.allModels.push_back(&m);
 	d.objectsAndPointers.push_back(&m);
-	std::cout << d.id << std::endl;
 	m.hasOwner = true;
 
 	// ADD TO HIERARCHY FOR EDITING

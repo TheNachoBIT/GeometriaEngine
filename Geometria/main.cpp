@@ -5,6 +5,8 @@
 #include "Application/Application.h"
 #include "Game/Scripts/TestScript.h"
 #include "Physics/PhysicsManager.h"
+#include "Physics/Rigidbody/Rigidbody.h"
+#include "Physics/Colliders/BoxCollider.h"
 
 //Original name: Chingatumadre Engine
 
@@ -79,15 +81,22 @@ int main(int argc, char** argv)
     }*/
 
     //Spawn 10k quads in "i" draw calls, with random colors
-    //for (int m = 0; m < 100000; m++)
-    //{
-    //    int x = rand() % 200, y = rand() % 100, z = rand() % 100;
-    //    float r = (rand() % 100) / 100.0f, g = (rand() % 100) / 100.0f, b = (rand() % 100) / 100.0f;
-    //    Model* model = new Model(Model::Square(), Vector3(x - 50, y - 50, z - 50), Vector3(0), Vector3(1));
-    //    model->color = Vector4(r, g, b, 0.2f);
-    //    models.push_back(model);
-    //    RendererCore::AddModel(*model);
-    //}
+    /*for (int m = 0; m < 1000; m++)
+    {
+        int x = rand() % 200, y = rand() % 100, z = rand() % 100;
+        float r = (rand() % 100) / 100.0f, g = (rand() % 100) / 100.0f, b = (rand() % 100) / 100.0f;
+        Model* model = new Model(Model::Square(), Vector3(x - 50, y - 50, z - 50), Vector3(0), Vector3(1));
+        model->color = Vector4(r, g, b, 0.2f);
+        model->AddScript<Rigidbody>();
+        model->AddScript<BoxCollider>();
+        RendererCore::AddModel(*model);
+    }
+
+    Model* model = new Model(Model::Square(), Vector3(0, -100, 0), Vector3(0, 0, 0), Vector3(1000, 0.5f, 1000));
+    model->GetTransform().rotation = Vector3(90, 0, 0);
+    model->color = Color::white();
+    model->AddScript<BoxCollider>();
+    RendererCore::AddModel(*model);*/
 
     //SceneTest::Init();
     SampleScene::Init();
