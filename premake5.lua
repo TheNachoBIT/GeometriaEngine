@@ -51,22 +51,7 @@ project "Geometria"
 	    	"GLFW",
 			"GLEW",
 			"yaml-cpp",
-			"opengl32.lib",
-
-			-- NVIDIA PhysX Libraries --
-			"Libraries/NVIDIAPHYSX/binaries/Win64/LowLevel_static_64.lib",
-			"Libraries/NVIDIAPHYSX/binaries/Win64/LowLevelAABB_static_64.lib",
-			"Libraries/NVIDIAPHYSX/binaries/Win64/LowLevelDynamics_static_64.lib",
-			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysX_static_64.lib",
-			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysXCharacterKinematic_static_64.lib",
-			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysXCommon_static_64.lib",
-			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysXCooking_static_64.lib",
-			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysXExtensions_static_64.lib",
-			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysXFoundation_static_64.lib",
-			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysXPvdSDK_static_64.lib",
-			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysXVehicle_static_64.lib",
-			"Libraries/NVIDIAPHYSX/binaries/Win64/SceneQuery_static_64.lib",
-			"Libraries/NVIDIAPHYSX/binaries/Win64/SimulationController_static_64.lib"
+			"opengl32.lib"
 	   }
 
 	filter "system:linux"
@@ -113,6 +98,44 @@ project "Geometria"
 
     filter "platforms:x86_64"
         architecture "x86_64"
+
+    -- NVIDIA PhysX Libraries (Win64) --
+    filter { "system:windows", "platforms:x86" }
+    	links
+		{
+			"Libraries/NVIDIAPHYSX/binaries/Win32/LowLevel_static_32.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win32/LowLevelAABB_static_32.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win32/LowLevelDynamics_static_32.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win32/PhysX_static_32.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win32/PhysXCharacterKinematic_static_32.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win32/PhysXCommon_static_32.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win32/PhysXCooking_static_32.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win32/PhysXExtensions_static_32.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win32/PhysXFoundation_static_32.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win32/PhysXPvdSDK_static_32.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win32/PhysXVehicle_static_32.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win32/SceneQuery_static_32.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win32/SimulationController_static_32.lib"
+		}
+
+	-- NVIDIA PhysX Libraries (Win32) --
+	filter { "system:windows", "platforms:x86_64" }
+		links
+		{
+			"Libraries/NVIDIAPHYSX/binaries/Win64/LowLevel_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/LowLevelAABB_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/LowLevelDynamics_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysX_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysXCharacterKinematic_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysXCommon_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysXCooking_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysXExtensions_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysXFoundation_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysXPvdSDK_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/PhysXVehicle_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/SceneQuery_static_64.lib",
+			"Libraries/NVIDIAPHYSX/binaries/Win64/SimulationController_static_64.lib"
+		}
 
     filter "system:windows"
     	systemversion "latest"
