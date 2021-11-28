@@ -27,6 +27,12 @@ void Model::DeleteModel()
 	d.deleteProcess = true;
 
 	RendererCore::ModifyVerticesOnBuffer(indexVertices, false, d);
+
+	vertices.clear();
+	std::vector<Vertex>().swap(vertices);
+
+	indexVertices.clear();
+	std::vector<int>().swap(indexVertices);
 }
 
 Matrix Model::SetTransformAndGetWorldMatrix(Vector3 position, Vector3 rotation, Vector3 scale)
@@ -56,6 +62,8 @@ void Model::SetVertices(Matrix matrix, std::vector<float> vertsToSet)
 		modelVertexData.push_back(vertsToSet[i]);
 	}
 
+	vertices.clear();
+	std::vector<Vertex>().swap(vertices);
 	vertices.resize(vertsToSet.size() / 4);
 
 	for (int i = 0; i < vertices.size(); i++)

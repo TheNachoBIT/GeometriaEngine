@@ -184,3 +184,11 @@ void Shader::Disable() const
 		glUseProgram(0);
 	}
 }
+
+void Shader::ClearFromRAM()
+{
+	//Yeah, every bit of data needs to be vanished from this earth once i call this
+
+	OGL_uniformLocationCache.clear();
+	std::unordered_map<std::string, GLint>().swap(OGL_uniformLocationCache);
+}

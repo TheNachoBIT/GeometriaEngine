@@ -22,4 +22,5 @@ public:
 
 	static void SetEditor();
 	static void SetGame();
+	static void Start();
 };

@@ -87,7 +87,21 @@ ImGUIElement* nameOfUI = new ImGUIElement(ImGUIElement::GUIType::type, *Editor::
 
 #define SaveExternalScripts(x) std::cout << "Saving " << #x << " with size of " << x.size() << std::endl; for(int i = 0; i < x.size(); i++) { x[i]->OnSave(); }
 
-#define SaveNewPointer(x, ...) std::cout << "Saving New Pointer... " << std::endl; SceneSaveAndLoad::isSavePointer = true; SceneSaveAndLoad::objectName = new std::ostringstream(); *SceneSaveAndLoad::objectName << #x << scriptId; *SceneSaveAndLoad::allPointers << #x << "* " << SceneSaveAndLoad::objectName->str() << ";" << std::endl; SceneSaveAndLoad::sceneCppSave << std::endl << "SceneSaveAndLoad::StartLoadArray(\"" << SceneSaveAndLoad::objectName->str() << "\");" << std::endl << SceneSaveAndLoad::objectName->str() << " = new " << #x << "(" << SceneSaveAndLoad::ModifyCode(#__VA_ARGS__) << ");" << std::endl; if(this->objectClassName == "") { SceneSaveAndLoad::sceneCppSave << SceneSaveAndLoad::objectName->str() << "->objectClassName = \"" << SceneSaveAndLoad::objectName->str() << "\";" << std::endl; } else {SceneSaveAndLoad::sceneCppSave << SceneSaveAndLoad::objectName->str() << "->objectClassName = \"" << this->objectClassName << "\";" << std::endl; }
+#define SaveNewPointer(x, ...) \
+std::cout << "Saving New Pointer... " << std::endl;\
+SceneSaveAndLoad::isSavePointer = true;\
+SceneSaveAndLoad::objectName = new std::ostringstream();\
+*SceneSaveAndLoad::objectName << #x << scriptId;\
+*SceneSaveAndLoad::allPointers << #x << "* " << SceneSaveAndLoad::objectName->str() << ";" << std::endl;\
+SceneSaveAndLoad::sceneCppSave << std::endl << "SceneSaveAndLoad::StartLoadArray(\"" << SceneSaveAndLoad::objectName->str() << "\");" << std::endl << SceneSaveAndLoad::objectName->str() << " = new " << #x << "(" << SceneSaveAndLoad::ModifyCode(#__VA_ARGS__) << ");" << std::endl;\
+if(this->objectClassName == "")\
+{\
+	SceneSaveAndLoad::sceneCppSave << SceneSaveAndLoad::objectName->str() << "->objectClassName = \"" << SceneSaveAndLoad::objectName->str() << "\";" << std::endl;\
+}\
+else\
+{\
+	SceneSaveAndLoad::sceneCppSave << SceneSaveAndLoad::objectName->str() << "->objectClassName = \"" << this->objectClassName << "\";" << std::endl;\
+}
 
 //Needs work
 #define SaveResource(source, classType, item, group) SceneSaveAndLoad::sceneCppSave << SceneSaveAndLoad::objectName->str() << "->" << #source << " = " << SceneSaveAndLoad::CreateOrAddIntoStructure(group, #classType, #item) << ";" << std::endl
@@ -142,6 +156,7 @@ struct ScriptBehaviour
 
 	bool _start = true;
 	bool isEnabled = true;
+	bool isBeingDestroyed = false;
 
 	enum class Class
 	{
@@ -176,6 +191,14 @@ struct ScriptBehaviour
 	ScriptBehaviour* CreateNewObject(ScriptBehaviour s) { ScriptBehaviour* newScript = new ScriptBehaviour(s); newScript->OnLoad(); return newScript; }
 
 	void StartScript();
+	void DestroyScript()
+	{
+		isBeingDestroyed = true;
+		OnDestroy();
+		delete this;
+	}
+
+	virtual void OnDestroy() { return; }
 
 	void AddMyselfToHierarchy();
 	void AddChild(ScriptBehaviour& child);

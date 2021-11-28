@@ -172,6 +172,11 @@ public:
 		return s;
 	}
 
+	void OnDestroy()
+	{
+		OnDelete();
+	}
+
 	void OnDelete();
 	void DeleteModel();
 

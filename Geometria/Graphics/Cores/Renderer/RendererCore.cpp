@@ -43,7 +43,7 @@ unsigned int indices[] = {
 
 void RendererCore::AddModel(Model& m)
 {
-	AddModel(m, SceneManager::MainScene().MainDrawCall());
+	AddModel(m, *SceneManager::MainScene().MainDrawCall());
 }
 
 void RendererCore::AddModel(Model& m, DrawCall& d)
@@ -117,7 +117,7 @@ void RendererCore::AddModel(Model& m, DrawCall& d)
 
 void RendererCore::AddImGUIElement(ImGUIElement& i)
 {
-	AddImGUIElement(i, SceneManager::MainScene().MainDrawCall());
+	AddImGUIElement(i, *SceneManager::MainScene().MainDrawCall());
 }
 
 void RendererCore::AddImGUIElement(ImGUIElement& i, DrawCall& d)
@@ -158,23 +158,37 @@ void RendererCore::AddImGUIElement(ImGUIElement& i, DrawCall& d)
 
 void RendererCore::SetUp()
 {
+	/*for (auto i : SceneManager::_allScenes)
+	{
+		for (auto d : i._drawCalls)
+		{
+			d->DeleteFromRAM();
+			d = nullptr;
+		}
+
+		i._drawCalls.clear();
+	}*/
+
+	SceneManager::_allScenes.clear();
+
 	SceneManager::CreateScene();
 	SceneManager::MainScene()._drawCalls.clear();
-	DrawCall(SceneManager::MainScene().CreateDrawCall(true));
-	SceneManager::MainScene().MainDrawCall().isMain = true;
-	SceneManager::MainScene().MainDrawCall().objectClassName = "Main Draw Call";
+	SceneManager::MainScene().CreateDrawCall(true);
+	SceneManager::MainScene().MainDrawCall()->isMain = true;
+	SceneManager::MainScene().MainDrawCall()->objectClassName = "Main Draw Call";
 	//SceneManager::MainScene().MainDrawCall().AddMyselfToHierarchy();
 }
 
 //Threading
 std::vector<std::future<void>> threads;
+bool endRenderThreads = false;
 std::mutex NUT;
 
 void SortVerticesMultithreading()
 {
 	auto wait_duration = std::chrono::milliseconds(250);
 
-	while (!Graphics::CanClose())
+	while (!Graphics::CanClose() && !endRenderThreads)
 	{
 		//std::cout << "Running!" << std::endl;
 		std::lock_guard<std::mutex> mutex(NUT);
@@ -182,6 +196,8 @@ void SortVerticesMultithreading()
 		NUT.unlock();
 		std::this_thread::sleep_for(wait_duration);
 	}
+
+	std::cout << "I'm done Sorting!" << std::endl;
 }
 
 void RendererCore::Start()
@@ -220,7 +236,7 @@ void RendererCore::OpenGL_Start()
 		{
 			for (int draw = 0; draw < SceneManager::_allScenes[scene]._drawCalls.size(); draw++)
 			{
-				DrawCall& d = SceneManager::_allScenes[scene]._drawCalls[draw];
+				DrawCall& d = *SceneManager::_allScenes[scene]._drawCalls[draw];
 				OpenGL_Start_DrawCall(d);
 			}
 		}
@@ -264,11 +280,6 @@ void RendererCore::OpenGL_Start_DrawCall(DrawCall& d)
 		//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
 
 		int pointerPosition = 0;
-
-		if (!Application::IsPlatform(Application::Platform::Windows))
-		{
-			std::cout << "I'm not on Windows! Yaaaayyyyy! :D" << std::endl;
-		}
 
 		if (!Graphics::IsIntelGPU() || !Application::IsPlatform(Application::Platform::Windows) || Graphics::IsIntelGPUBypassed())
 		{
@@ -327,7 +338,7 @@ DrawCall* RendererCore::FindDrawCall(int sceneId, int id)
 		{
 			for (int draw = 0; draw < SceneManager::_allScenes[scene]._drawCalls.size(); draw++)
 			{
-				DrawCall& d = s._drawCalls[draw];
+				DrawCall& d = *s._drawCalls[draw];
 
 				if (d.id == id)
 				{
@@ -348,7 +359,7 @@ void RendererCore::SetUpWorldMatrix()
 	{
 		for (int draw = 0; draw < SceneManager::_allScenes[scene]._drawCalls.size(); draw++)
 		{
-			DrawCall& d = SceneManager::_allScenes[scene]._drawCalls[draw];
+			DrawCall& d = *SceneManager::_allScenes[scene]._drawCalls[draw];
 			d.worldMatrix = Matrix(1.0f);
 			d.worldMatrix = Matrix::Translate(d.worldMatrix, Vector3(0));
 			d.worldMatrix = Matrix::Rotate(d.worldMatrix, Vector3(0));
@@ -362,6 +373,7 @@ void RendererCore::Render()
 {
 	if (preRender)
 	{
+		endRenderThreads = false;
 		threads.push_back(std::async(std::launch::async, SortVerticesMultithreading));
 		preRender = false;
 	}
@@ -370,6 +382,18 @@ void RendererCore::Render()
 	{
 		OpenGL_Render();
 	}
+}
+
+void RendererCore::EndThreads()
+{
+	endRenderThreads = true;
+	for (int i = 0; i < threads.size(); i++)
+	{
+		threads[i].wait();
+	}
+	preRender = true;
+	threads.clear();
+	std::vector<std::future<void>>().swap(threads);
 }
 
 struct {
@@ -410,7 +434,7 @@ void RendererCore::SortVertices()
 	{
 		for (int draw = 0; draw < SceneManager::_allScenes[scene]._drawCalls.size(); draw++)
 		{
-			DrawCall& d = SceneManager::_allScenes[scene]._drawCalls[draw];
+			DrawCall& d = *SceneManager::_allScenes[scene]._drawCalls[draw];
 
 			if (d.sort != DrawCall::Sorting::Static)
 			{
@@ -461,7 +485,6 @@ void RendererCore::SortVertices()
 					doSort = false;*/
 
 				bool startupSort = DrawCall::Sorting::AtStartup && d.start < 2;
-
 				if (d.sort == DrawCall::Sorting::Update || startupSort)
 				{
 					std::vector<int> change;
@@ -549,9 +572,14 @@ void RendererCore::SortVertices()
 						}
 					}
 				}
+				else
+				{
+					//std::cout << draw << ": Not Updating!" << std::endl;
+				}
 			}
 			else
 			{
+				//std::cout << draw << ": Is Static!" << std::endl;
 				d.start = 3;
 			}
 		}
@@ -594,7 +622,7 @@ void RendererCore::GetBeginAndEndVectors()
 	{
 		for (int draw = 0; draw < SceneManager::_allScenes[scene]._drawCalls.size(); draw++)
 		{
-			DrawCall& d = SceneManager::_allScenes[scene]._drawCalls[draw];
+			DrawCall& d = *SceneManager::_allScenes[scene]._drawCalls[draw];
 
 			if (d.modifyVectors.size() != 0)
 			{
@@ -715,7 +743,7 @@ void RendererCore::OpenGL_Render()
 			for (int draw = 0; draw < SceneManager::_allScenes[scene]._drawCalls.size(); draw++)
 			{
 				//std::cout << "Scene: " << scene + 1 << " Draw Call: " << draw + 1 << std::endl;
-				DrawCall& d = SceneManager::_allScenes[scene]._drawCalls[draw];
+				DrawCall& d = *SceneManager::_allScenes[scene]._drawCalls[draw];
 
 				if (d.deleteProcess)
 				{
@@ -731,7 +759,6 @@ void RendererCore::OpenGL_Render()
 						ImGui_ImplGlfw_NewFrame();
 						ImGui_ImplOpenGL3_NewFrame();
 						ImGui::NewFrame();
-						ImGuizmo::BeginFrame();
 
 						for (int i = 0; i < d.allImGUI.size(); i++)
 						{

@@ -33,10 +33,12 @@ int main(int argc, char** argv)
         std::cout << "Intel GPU Bypassed!" << std::endl;
     }
 
-    Graphics::MainCamera() = new Camera(Vector3(0, 0, 2), 70.0f, (float)Graphics::GetMainWindow().width / (float)Graphics::GetMainWindow().height, 0.1f, 1000.0f);
+    Application::Start();
+
+   /* Graphics::MainCamera() = new Camera(Vector3(0, 0, 2), 70.0f, (float)Graphics::GetMainWindow().width / (float)Graphics::GetMainWindow().height, 0.1f, 1000.0f);
     Graphics::MainCamera()->objectClassName = "Main Camera";
 
-    RendererCore::SetUp();
+    RendererCore::SetUp();*/
 
     //STARTUP COMPONENTS INSTANTIATE HERE!!!
     //======================================================================================
@@ -99,7 +101,7 @@ int main(int argc, char** argv)
     RendererCore::AddModel(*model);*/
 
     //SceneTest::Init();
-    SampleScene::Init();
+    //SampleScene::Init();
 
     //Spawn 2 quads with textures
     /*Model* model = new Model(Model::Square(), Vector3(0, 0, 0), Vector3(0), Vector3(1, 1, 1));*/
@@ -134,15 +136,15 @@ int main(int argc, char** argv)
     //START AND UPDATE
     //===========================================================
 
-    RendererCore::Start();
+    //RendererCore::Start();
 
-    Application::SetEditor();
+    //Application::SetEditor();
 
     //SceneSaveAndLoad::StartSceneSave(&SceneManager::MainScene());
 
     //SceneTest::Init();
 
-    Editor::Begin();
+    //Editor::Begin();
 
     int speed = 4;
 
@@ -240,13 +242,20 @@ int main(int argc, char** argv)
 
                     if (Input::GetKeyDown(GLFW_KEY_S))
                     {
-                        DrawCall main = SceneManager::MainScene().MainDrawCall();
-                        main.isMain = true;
-                        main.sort = SceneManager::MainScene().MainDrawCall().sort;
-                        main.type = SceneManager::MainScene().MainDrawCall().type;
-                        Hierarchy::allScripts[SceneManager::MainScene().MainDrawCall().id] = &main;
+                        DrawCall* main = SceneManager::MainScene().MainDrawCall();
+                        main->isMain = true;
+                        main->sort = SceneManager::MainScene().MainDrawCall()->sort;
+                        main->type = SceneManager::MainScene().MainDrawCall()->type;
+                        Hierarchy::allScripts[SceneManager::MainScene().MainDrawCall()->id] = main;
                         std::cout << "Saved!" << std::endl;
                         SceneSaveAndLoad::StartSceneSave(&SceneManager::MainScene());
+                    }
+
+                    if (Input::GetKeyDown(GLFW_KEY_R))
+                    {
+                        std::cout << "Restarting Scene" << std::endl;
+                        Application::Start();
+                        std::cout << "Scene Restarted!" << std::endl;
                     }
                 }
             }

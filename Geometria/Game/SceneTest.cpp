@@ -3,7 +3,7 @@
 
 void SceneTest::Init()
 {
-	DrawCall* gameDrawCall = new DrawCall(SceneManager::MainScene().CreateDrawCall());
+	DrawCall* gameDrawCall = SceneManager::MainScene().CreateDrawCall();
 	gameDrawCall->sort = DrawCall::Sorting::AtStartup;
 	gameDrawCall->type = DrawCall::Type::UI;
 	gameDrawCall->objectClassName = "Editor Draw Call";

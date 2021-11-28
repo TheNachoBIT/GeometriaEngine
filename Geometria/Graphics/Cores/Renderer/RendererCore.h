@@ -42,6 +42,8 @@ public:
 	static void SetUpWorldMatrix();
 	static void Render();
 
+	static void EndThreads();
+
 	static void SortVertices();
 	static void ModifyVerticesOnBuffer(std::vector<int> index, bool rC, DrawCall& d);
 

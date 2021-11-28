@@ -66,6 +66,24 @@ class TextureManager
 public:
 	static std::vector<TextureGroup> textureGroups;
 
+	static void ClearRAM()
+	{
+		for (int i = 0; i < textureGroups.size(); i++)
+		{
+			for (auto t : textureGroups[i].allTextures)
+			{
+				if (t != nullptr)
+					delete t;
+
+				t = nullptr;
+			}
+			
+			textureGroups[i].allTextures.clear();
+		}
+
+		textureGroups.clear();
+	}
+
 	static void UploadToGPU()
 	{
 		for (int i = 0; i < textureGroups.size(); i++)

@@ -51,6 +51,11 @@ public:
 	bool refresh = false;
 
 	void Refresh();
+	void OnDestroy()
+	{
+		DeleteFromRAM();
+	}
+	void DeleteFromRAM();
 
 	int uiWidth = 800, uiHeight = 600;
 
@@ -82,9 +87,9 @@ public:
 
 	int mvIndexBegin, mvIndexEnd;
 
-	Vertex* bufferPointer;
+	Vertex* bufferPointer = nullptr;
 
-	Shader* mainShader;
+	Shader* mainShader = nullptr;
 	uint32_t VAO, VBO, EBO;
 
 	Matrix worldMatrix;
@@ -94,19 +99,19 @@ class Scene
 {
 public:
 	int id;
-	std::vector<DrawCall> _drawCalls;
+	std::vector<DrawCall*> _drawCalls;
 
-	DrawCall& MainDrawCall()
+	DrawCall* MainDrawCall()
 	{
 		return _drawCalls[0];
 	}
 
-	DrawCall& CreateDrawCall()
+	DrawCall* CreateDrawCall()
 	{
 		return CreateDrawCall(false);
 	}
 
-	DrawCall& CreateDrawCall(bool startEmpty);
+	DrawCall* CreateDrawCall(bool startEmpty);
 };
 
 class SceneManager

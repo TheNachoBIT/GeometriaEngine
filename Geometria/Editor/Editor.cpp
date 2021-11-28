@@ -209,7 +209,7 @@ void Editor::Begin()
 {
 	Editor::actualHierarchySize = Hierarchy::allScripts.size();
 
-	editorDrawCall = new DrawCall(SceneManager::MainScene().CreateDrawCall());
+	editorDrawCall = SceneManager::MainScene().CreateDrawCall();
 	editorDrawCall->sort = DrawCall::Sorting::AtStartup;
 	editorDrawCall->type = DrawCall::Type::UI;
 	editorDrawCall->objectClassName = "Editor Draw Call";
@@ -354,7 +354,7 @@ void Hierarchy_CreateItem(ScriptBehaviour& script, ImGUIElement* owner)
 
 	for (int i = 0; i < script.scripts.size(); i++)
 	{
-		Hierarchy_CreateItem(*script.objectsAndPointers[i], owner);
+		Hierarchy_CreateItem(*script.scripts[i], owner);
 	}
 
 }
@@ -373,7 +373,7 @@ void Editor::HierarchyBegin()
 	Editor::HierarchyWindow->enableOpenAndClose = true;
 	Editor::HierarchyWindow->isOpen = lastHierarchyState;
 
-	Hierarchy_CreateItem(SceneManager::MainScene().MainDrawCall(), nullptr);
+	Hierarchy_CreateItem(*SceneManager::MainScene().MainDrawCall(), nullptr);
 
 	for (int i = 0; i < Editor::actualHierarchySize; i++)
 	{
