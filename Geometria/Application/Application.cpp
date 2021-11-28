@@ -51,6 +51,12 @@ void Application::Start()
 		Hierarchy::allScripts[i] = nullptr;
 	}
 
+	Hierarchy::allStaticScripts.clear();
+	std::vector<ScriptBehaviour*>().swap(Hierarchy::allStaticScripts);
+
+	Hierarchy::listOfStaticScripts.clear();
+	std::vector<std::string>().swap(Hierarchy::listOfStaticScripts);
+
 	Hierarchy::allScripts.clear();
 	std::vector<ScriptBehaviour*>().swap(Hierarchy::allScripts);
 
