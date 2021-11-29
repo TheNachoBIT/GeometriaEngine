@@ -14,6 +14,7 @@
 
 #include <vector>
 
+#define PHYSICSMANAGER_H
 class PhysicsManager : public ScriptBehaviour
 {
 public:
@@ -34,6 +35,7 @@ public:
 
 	static bool preUpdate;
 
+	void OnStartup();
 	void OnStart();
 	void OnUpdate();
 

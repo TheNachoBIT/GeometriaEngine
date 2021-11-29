@@ -10,11 +10,16 @@ void BoxCollider::OnStart()
 
 	if (GetScript<Rigidbody>() == nullptr)
 	{
-		boxStatic = PhysicsManager::CreateStaticBox(GetTransform().position, GetTransform().scale);
+		if(boxStatic == nullptr)
+			boxStatic = PhysicsManager::CreateStaticBox(GetTransform().position, GetTransform().scale);
 	}
 	else
 	{
-		boxDynamic = PhysicsManager::CreateDynamicBox(GetTransform().position, GetTransform().scale);
+		if (boxDynamic == nullptr)
+		{
+			boxDynamic = PhysicsManager::CreateDynamicBox(GetTransform().position, GetTransform().scale);
+			std::cout << "Dynamic Box Set!" << std::endl;
+		}
 	}
 }
 

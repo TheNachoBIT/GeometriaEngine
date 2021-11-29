@@ -3,13 +3,18 @@
 physx::PxRigidDynamic* dynamicTest;
 
 physx::PxPhysics* PhysicsManager::gPhysics = NULL;
-physx::PxScene* PhysicsManager::gScene = NULL;
+physx::PxScene* PhysicsManager::gScene = nullptr;
 physx::PxMaterial* PhysicsManager::gMaterial = NULL;
 
 bool PhysicsManager::preUpdate = true;
 
 std::vector<physx::PxRigidDynamic*> PhysicsManager::allDynamics;
 std::vector<physx::PxRigidStatic*> PhysicsManager::allStatics;
+
+void PhysicsManager::OnStartup()
+{
+
+}
 
 void PhysicsManager::OnStart()
 {
@@ -51,6 +56,9 @@ void PhysicsManager::OnUpdate()
 		{
 			gScene->addActor(*i);
 		}
+
+		std::cout << PhysicsManager::allDynamics.size() << std::endl;
+
 		preUpdate = false;
 	}
 }
@@ -72,9 +80,9 @@ physx::PxRigidDynamic* PhysicsManager::CreateDynamicBox(Vector3 position, Vector
 {
 	physx::PxShape* boxShape = PhysicsManager::gPhysics->createShape(physx::PxBoxGeometry(scale.x / 2, scale.y / 2, scale.z / 2), *PhysicsManager::gMaterial);
 
-	physx::PxRigidDynamic* boxDynamic = physx::PxCreateDynamic(*PhysicsManager::gPhysics, physx::PxTransform(physx::PxVec3(position.x, position.y, position.z)), *boxShape, 10.0f);
-	boxDynamic->setAngularDamping(0.5f);
-	boxDynamic->setLinearVelocity(physx::PxVec3(0));
+	physx::PxRigidDynamic* boxDynamic = physx::PxCreateDynamic(*PhysicsManager::gPhysics, 
+		physx::PxTransform(physx::PxVec3(position.x, position.y, position.z)), 
+		*boxShape, 0);
 
 	PhysicsManager::allDynamics.push_back(boxDynamic);
 

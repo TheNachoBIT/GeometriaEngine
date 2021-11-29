@@ -8,7 +8,13 @@
 #include "geometria.h"
 #endif
 
+#ifndef PHYSICSMANAGER_H
 #include "../PhysicsManager.h"
+#endif
+
+#ifndef BOXCOLLIDER_H
+#include "../Colliders/BoxCollider.h"
+#endif
 
 struct Rigidbody : public ScriptBehaviour
 {
@@ -21,9 +27,16 @@ struct Rigidbody : public ScriptBehaviour
 	bool forceChange = false;
 	Transform forcedTransform;
 
+	BoxCollider* boxC;
+
+	bool freezePositionX = false;
+	bool freezePositionZ = false;
+
 	Transform& GetRigidbodyTransform()
 	{
 		forceChange = true;
 		return forcedTransform;
 	}
+
+	void SetVelocity(Vector3 add);
 };

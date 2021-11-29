@@ -8,14 +8,17 @@
 #include "geometria.h"
 #endif
 
+#ifndef PHYSICSMANAGER_H
 #include "../PhysicsManager.h"
+#endif
 
+#define BOXCOLLIDER_H
 struct BoxCollider : public ScriptBehaviour
 {
 	AllowCloning(BoxCollider);
 
 	physx::PxRigidStatic* boxStatic = nullptr;
-	physx::PxRigidDynamic* boxDynamic;
+	physx::PxRigidDynamic* boxDynamic = nullptr;
 
 	physx::PxShape* boxShape = nullptr;
 

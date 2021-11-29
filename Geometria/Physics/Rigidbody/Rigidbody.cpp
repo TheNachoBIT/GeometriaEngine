@@ -11,7 +11,6 @@ void Rigidbody::OnStart()
 
 void Rigidbody::OnUpdate()
 {
-	auto* boxC = GetScript<BoxCollider>();
 	if (boxC != nullptr)
 	{
 		if (boxC->boxDynamic != nullptr)
@@ -20,7 +19,21 @@ void Rigidbody::OnUpdate()
 			{
 				physx::PxTransform t = boxC->boxDynamic->getGlobalPose();
 				physx::PxVec3 pos = t.p;
-				GetTransform().position = Vector3(t.p.x, t.p.y, t.p.z);
+
+				if (freezePositionX)
+				{
+					boxC->boxDynamic->setGlobalPose(physx::PxTransform(GetTransform().position.x, pos.y, pos.z));
+					pos = boxC->boxDynamic->getGlobalPose().p;
+				}
+
+				if (freezePositionZ)
+				{
+					boxC->boxDynamic->setGlobalPose(physx::PxTransform(pos.x, pos.y, GetTransform().position.z));
+					pos = boxC->boxDynamic->getGlobalPose().p;
+				}
+
+				GetTransform().position = Vector3(pos.x, pos.y, pos.z);
+				forcedTransform.position = GetTransform().position;
 			}
 			else
 			{
@@ -32,11 +45,19 @@ void Rigidbody::OnUpdate()
 	}
 	else
 	{
-		std::cout << "Box Collider not found" << std::endl;
+		boxC = GetScript<BoxCollider>();
 	}
 }
 
 void Rigidbody::OnInspector()
 {
 	VisualAccess_Title(Rigidbody);
+}
+
+void Rigidbody::SetVelocity(Vector3 add)
+{
+	if (boxC != nullptr)
+	{
+		boxC->boxDynamic->setLinearVelocity(physx::PxVec3(add.x, add.y, add.z));
+	}
 }
