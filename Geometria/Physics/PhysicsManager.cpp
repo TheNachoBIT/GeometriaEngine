@@ -2,29 +2,39 @@
 
 physx::PxRigidDynamic* dynamicTest;
 
-physx::PxPhysics* PhysicsManager::gPhysics = NULL;
+physx::PxPhysics* PhysicsManager::gPhysics = nullptr;
 physx::PxScene* PhysicsManager::gScene = nullptr;
-physx::PxMaterial* PhysicsManager::gMaterial = NULL;
+physx::PxMaterial* PhysicsManager::gMaterial = nullptr;
 
 bool PhysicsManager::preUpdate = true;
+bool PhysicsManager::foundationCreated = false;
+bool PhysicsManager::physicsCreated = false;
+bool PhysicsManager::sceneCreated = false;
 
 std::vector<physx::PxRigidDynamic*> PhysicsManager::allDynamics;
 std::vector<physx::PxRigidStatic*> PhysicsManager::allStatics;
 
 void PhysicsManager::OnStartup()
 {
-
+	
 }
 
 void PhysicsManager::OnStart()
 {
-	if (gScene != nullptr)
+	if (PhysicsManager::sceneCreated == true && gScene != nullptr)
 	{
 		gScene->release();
 	}
 
-	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
-	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, physx::PxTolerancesScale(), true);
+	if (!PhysicsManager::foundationCreated)
+	{
+		gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
+	}
+
+	if (!PhysicsManager::physicsCreated)
+	{
+		gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, physx::PxTolerancesScale(), true);
+	}
 
 	physx::PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
 	sceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
@@ -33,11 +43,12 @@ void PhysicsManager::OnStart()
 	sceneDesc.filterShader = physx::PxDefaultSimulationFilterShader;
 	gScene = gPhysics->createScene(sceneDesc);
 
-	gMaterial = PhysicsManager::gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
+	gMaterial = PhysicsManager::gPhysics->createMaterial(0.5f, 0.5f, 0);
 
-	std::cout << "Physics Set Up!" << std::endl;
-
-	preUpdate = true;
+	PhysicsManager::physicsCreated = true;
+	PhysicsManager::foundationCreated = true;
+	PhysicsManager::sceneCreated = true;
+	PhysicsManager::preUpdate = true;
 }
 
 void PhysicsManager::OnUpdate()
@@ -61,6 +72,17 @@ void PhysicsManager::OnUpdate()
 
 		preUpdate = false;
 	}
+}
+
+void PhysicsManager::OnDestroy()
+{
+	PhysicsManager::allDynamics.clear();
+	std::vector<physx::PxRigidDynamic*>().swap(PhysicsManager::allDynamics);
+
+	PhysicsManager::allStatics.clear();
+	std::vector<physx::PxRigidStatic*>().swap(PhysicsManager::allStatics);
+
+
 }
 
 physx::PxRigidStatic* PhysicsManager::CreateStaticBox(Vector3 position, Vector3 scale)

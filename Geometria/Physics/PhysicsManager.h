@@ -22,10 +22,10 @@ public:
 	physx::PxDefaultAllocator gAllocator;
 	physx::PxDefaultErrorCallback gErrorCallback;
 
-	physx::PxFoundation* gFoundation = NULL;
+	physx::PxFoundation* gFoundation = nullptr;
 	static physx::PxPhysics* gPhysics;
 
-	physx::PxDefaultCpuDispatcher* gDispatcher = NULL;
+	physx::PxDefaultCpuDispatcher* gDispatcher = nullptr;
 	static physx::PxScene* gScene;
 
 	static physx::PxMaterial* gMaterial;
@@ -34,10 +34,12 @@ public:
 	static std::vector<physx::PxRigidStatic*> allStatics;
 
 	static bool preUpdate;
+	static bool foundationCreated, physicsCreated, sceneCreated;
 
 	void OnStartup();
 	void OnStart();
 	void OnUpdate();
+	void OnDestroy();
 
 	static physx::PxRigidStatic* CreateStaticBox(Vector3 position, Vector3 scale);
 	static physx::PxRigidDynamic* CreateDynamicBox(Vector3 position, Vector3 scale);
