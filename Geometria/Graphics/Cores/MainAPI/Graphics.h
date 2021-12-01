@@ -67,7 +67,18 @@ private:
 	static Camera* _mainCamera;
 	static int _oGLDepthFunction;
 	static Vector2 _mousePosition, _mouseSpeed;
+	static bool _bypassIntel;
 public:
+	static void BypassIntel(bool t)
+	{
+		_bypassIntel = t;
+	}
+
+	static bool IsIntelGPUBypassed()
+	{
+		return _bypassIntel;
+	}
+
 	static bool IsWorking()
 	{
 		return _init;

@@ -5,22 +5,41 @@
 #include "Game/SampleScene.tits.h"
 #include "Application/Application.h"
 #include "Game/Scripts/TestScript.h"
+#include "Physics/PhysicsManager.h"
+#include "Physics/Rigidbody/Rigidbody.h"
+#include "Physics/Colliders/BoxCollider.h"
 
 //Original name: Chingatumadre Engine
 
 static std::vector<Model*> models;
 bool firstFrame = true, secondFrame = true;
-int main(void)
+int main(int argc, char** argv)
 {
     Graphics::Init();
     Graphics::CreateWindow(640, 480, "what the hell is wrong with my life");
 
     Graphics::Start();
 
-    Graphics::MainCamera() = new Camera(Vector3(0, 0, 2), 70.0f, (float)Graphics::GetMainWindow().width / (float)Graphics::GetMainWindow().height, 0.1f, 1000.0f);
+    for (int i = 0; i < argc; i++)
+    {
+        std::string commandLine = argv[i];
+        if (commandLine == "--bypass-intel")
+        {
+            Graphics::BypassIntel(true);
+        }
+    }
+
+    if (Graphics::IsIntelGPUBypassed())
+    {
+        std::cout << "Intel GPU Bypassed!" << std::endl;
+    }
+
+    Application::Start();
+
+   /* Graphics::MainCamera() = new Camera(Vector3(0, 0, 2), 70.0f, (float)Graphics::GetMainWindow().width / (float)Graphics::GetMainWindow().height, 0.1f, 1000.0f);
     Graphics::MainCamera()->objectClassName = "Main Camera";
 
-    RendererCore::SetUp();
+    RendererCore::SetUp();*/
 
     //STARTUP COMPONENTS INSTANTIATE HERE!!!
     //======================================================================================
@@ -65,18 +84,25 @@ int main(void)
     }*/
 
     //Spawn 10k quads in "i" draw calls, with random colors
-    //for (int m = 0; m < 100000; m++)
-    //{
-    //    int x = rand() % 200, y = rand() % 100, z = rand() % 100;
-    //    float r = (rand() % 100) / 100.0f, g = (rand() % 100) / 100.0f, b = (rand() % 100) / 100.0f;
-    //    Model* model = new Model(Model::Square(), Vector3(x - 50, y - 50, z - 50), Vector3(0), Vector3(1));
-    //    model->color = Vector4(r, g, b, 0.2f);
-    //    models.push_back(model);
-    //    RendererCore::AddModel(*model);
-    //}
+    /*for (int m = 0; m < 1000; m++)
+    {
+        int x = rand() % 200, y = rand() % 100, z = rand() % 100;
+        float r = (rand() % 100) / 100.0f, g = (rand() % 100) / 100.0f, b = (rand() % 100) / 100.0f;
+        Model* model = new Model(Model::Square(), Vector3(x - 50, y - 50, z - 50), Vector3(0), Vector3(1));
+        model->color = Vector4(r, g, b, 0.2f);
+        model->AddScript<Rigidbody>();
+        model->AddScript<BoxCollider>();
+        RendererCore::AddModel(*model);
+    }
+
+    Model* model = new Model(Model::Square(), Vector3(0, -100, 0), Vector3(0, 0, 0), Vector3(1000, 0.5f, 1000));
+    model->GetTransform().rotation = Vector3(90, 0, 0);
+    model->color = Color::white();
+    model->AddScript<BoxCollider>();
+    RendererCore::AddModel(*model);*/
 
     //SceneTest::Init();
-    SampleScene::Init();
+    //SampleScene::Init();
 
     //Spawn 2 quads with textures
     /*Model* model = new Model(Model::Square(), Vector3(0, 0, 0), Vector3(0), Vector3(1, 1, 1));*/
@@ -111,13 +137,15 @@ int main(void)
     //START AND UPDATE
     //===========================================================
 
-    RendererCore::Start();
+    //RendererCore::Start();
 
-    Application::SetEditor();
+    //Application::SetEditor();
 
     //SceneSaveAndLoad::StartSceneSave(&SceneManager::MainScene());
 
-    Editor::Begin();
+    //SceneTest::Init();
+
+    //Editor::Begin();
 
     int speed = 4;
 
@@ -215,13 +243,20 @@ int main(void)
 
                     if (Input::GetKeyDown(GLFW_KEY_S))
                     {
-                        DrawCall main = SceneManager::MainScene().MainDrawCall();
-                        main.isMain = true;
-                        main.sort = SceneManager::MainScene().MainDrawCall().sort;
-                        main.type = SceneManager::MainScene().MainDrawCall().type;
-                        Hierarchy::allScripts[SceneManager::MainScene().MainDrawCall().id] = &main;
+                        DrawCall* main = SceneManager::MainScene().MainDrawCall();
+                        main->isMain = true;
+                        main->sort = SceneManager::MainScene().MainDrawCall()->sort;
+                        main->type = SceneManager::MainScene().MainDrawCall()->type;
+                        Hierarchy::allScripts[SceneManager::MainScene().MainDrawCall()->id] = main;
                         std::cout << "Saved!" << std::endl;
                         SceneSaveAndLoad::StartSceneSave(&SceneManager::MainScene());
+                    }
+
+                    if (Input::GetKeyDown(GLFW_KEY_R))
+                    {
+                        std::cout << "Restarting Scene" << std::endl;
+                        Application::Start();
+                        std::cout << "Scene Restarted!" << std::endl;
                     }
                 }
             }
@@ -266,5 +301,6 @@ int main(void)
     }
 
     Graphics::Exit();
+    exit(0);
     return 0;
 }

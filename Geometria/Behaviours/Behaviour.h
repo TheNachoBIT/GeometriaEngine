@@ -10,11 +10,14 @@ class Hierarchy
 public:
 	static int highestScriptId;
 	static std::vector<ScriptBehaviour*> deleteList;
-	static std::vector<ScriptBehaviour*> allScripts;
+	static std::vector<ScriptBehaviour*> allScripts, allStaticScripts;
 	static std::vector<ScriptBehaviour*> allUpdateScripts, allUpdateEditorScripts;
 	static std::vector<std::pair<std::string, ScriptBehaviour*>> scriptsWithVisualAccess;
+	static std::vector<std::string> listOfStaticScripts;
 	static bool _setEditor;
 	static void EditorMode(bool e);
+	static void AddScript(ScriptBehaviour* s);
+
 
 	static void StartScripts();
 	static void UpdateScripts();
@@ -37,23 +40,69 @@ struct Transform
 	void SaveTransform();
 };
 
-#define VisualAccess(x) bool _SB_GetVisualAccess()\
+#define VisualAccess(x) bool _SB_GetVisualAccessOf##x()\
 {\
 	Hierarchy::scriptsWithVisualAccess.push_back(std::make_pair(#x, new x()));\
 	Hierarchy::allScripts.pop_back();\
 	return true;\
 }\
 \
-bool _SB_VisualAccess = _SB_GetVisualAccess();
+bool _SB_VisualAccessOf##x = _SB_GetVisualAccessOf##x();
 
 #define AllowCloning(x) ScriptBehaviour* Clone()\
 {\
 	return new x(static_cast<x>(*this));\
 }
 
+#define RequireStaticScript(x)\
+bool _SB_Found##x = false;\
+for (int i = 0; i < Hierarchy::listOfStaticScripts.size(); i++)\
+{\
+	if (Hierarchy::listOfStaticScripts[i] == #x)\
+	{\
+		_SB_Found##x = true;\
+		break;\
+	}\
+}\
+\
+if (!_SB_Found##x)\
+{\
+	Hierarchy::allScripts.push_back(new x());\
+	Hierarchy::allScripts.pop_back();\
+	Hierarchy::allScripts[Hierarchy::allScripts.size() - 1]->ClassType = ScriptBehaviour::Class::Static;\
+	Hierarchy::allScripts[Hierarchy::allScripts.size() - 1]->StartScript();\
+	Hierarchy::listOfStaticScripts.push_back(#x);\
+}
+
+#define VisualAccess_Title(x)\
+ImGUIElement* NewLine = new ImGUIElement(ImGUIElement::GUIType::Text, *Editor::Inspector, "");\
+ImGUIElement* title = new ImGUIElement(ImGUIElement::GUIType::Text, *Editor::Inspector, #x);\
+title->Alignment = ImGUIElement::AlignTo::Center
+
+#define VisualAccess_AddValue(type, name, value)\
+ImGUIElement* _In##name = new ImGUIElement(ImGUIElement::GUIType::type, *Editor::Inspector, #name, value)
+
+#define VisualAccess_AddEditUIValue(nameOfUI, type, name, value)\
+ImGUIElement* nameOfUI = new ImGUIElement(ImGUIElement::GUIType::type, *Editor::Inspector, #name, value)
+
+
 #define SaveExternalScripts(x) std::cout << "Saving " << #x << " with size of " << x.size() << std::endl; for(int i = 0; i < x.size(); i++) { x[i]->OnSave(); }
 
-#define SaveNewPointer(x, ...) std::cout << "Saving New Pointer... " << std::endl; SceneSaveAndLoad::isSavePointer = true; SceneSaveAndLoad::objectName = new std::ostringstream(); *SceneSaveAndLoad::objectName << #x << scriptId; *SceneSaveAndLoad::allPointers << #x << "* " << SceneSaveAndLoad::objectName->str() << ";" << std::endl; SceneSaveAndLoad::sceneCppSave << std::endl << "SceneSaveAndLoad::StartLoadArray(\"" << SceneSaveAndLoad::objectName->str() << "\");" << std::endl << SceneSaveAndLoad::objectName->str() << " = new " << #x << "(" << SceneSaveAndLoad::ModifyCode(#__VA_ARGS__) << ");" << std::endl; if(this->objectClassName == "") { SceneSaveAndLoad::sceneCppSave << SceneSaveAndLoad::objectName->str() << "->objectClassName = \"" << SceneSaveAndLoad::objectName->str() << "\";" << std::endl; } else {SceneSaveAndLoad::sceneCppSave << SceneSaveAndLoad::objectName->str() << "->objectClassName = \"" << this->objectClassName << "\";" << std::endl; }
+#define SaveNewPointer(x, ...) \
+std::cout << "Saving New Pointer... " << std::endl;\
+SceneSaveAndLoad::isSavePointer = true;\
+SceneSaveAndLoad::objectName = new std::ostringstream();\
+*SceneSaveAndLoad::objectName << #x << scriptId;\
+*SceneSaveAndLoad::allPointers << #x << "* " << SceneSaveAndLoad::objectName->str() << ";" << std::endl;\
+SceneSaveAndLoad::sceneCppSave << std::endl << "SceneSaveAndLoad::StartLoadArray(\"" << SceneSaveAndLoad::objectName->str() << "\");" << std::endl << SceneSaveAndLoad::objectName->str() << " = new " << #x << "(" << SceneSaveAndLoad::ModifyCode(#__VA_ARGS__) << ");" << std::endl;\
+if(this->objectClassName == "")\
+{\
+	SceneSaveAndLoad::sceneCppSave << SceneSaveAndLoad::objectName->str() << "->objectClassName = \"" << SceneSaveAndLoad::objectName->str() << "\";" << std::endl;\
+}\
+else\
+{\
+	SceneSaveAndLoad::sceneCppSave << SceneSaveAndLoad::objectName->str() << "->objectClassName = \"" << this->objectClassName << "\";" << std::endl;\
+}
 
 //Needs work
 #define SaveResource(source, classType, item, group) SceneSaveAndLoad::sceneCppSave << SceneSaveAndLoad::objectName->str() << "->" << #source << " = " << SceneSaveAndLoad::CreateOrAddIntoStructure(group, #classType, #item) << ";" << std::endl
@@ -73,7 +122,15 @@ bool _SB_VisualAccess = _SB_GetVisualAccess();
 #define SaveInstruction(function) SceneSaveAndLoad::sceneCppSave << SceneSaveAndLoad::ModifyCode(#function) << std::endl
 #define SaveResourceInstructionAtEnd(function, group) SceneSaveAndLoad::CreateOrAddFunctionIntoStructureOnce(group, #function)
 
-#define SaveEnd() SceneSaveAndLoad::isSavePointer = false; SceneSaveAndLoad::sceneCppSave << "SceneSaveAndLoad::EndLoadArray();" << std::endl
+#define SaveNewScript(x)\
+std::string _SBSave_##x;\
+_SBSave_##x += "CurrentObject::AddScript<";\
+_SBSave_##x += #x;\
+_SBSave_##x += ">();";\
+SceneSaveAndLoad::sceneCppSave << SceneSaveAndLoad::ModifyCode(_SBSave_##x) << std::endl
+
+#define SaveEnd() for(int i = 0; i < scripts.size(); i++) { scripts[i]->OnSave(); }\
+SceneSaveAndLoad::isSavePointer = false; SceneSaveAndLoad::sceneCppSave << "SceneSaveAndLoad::EndLoadArray();" << std::endl
 
 struct ScriptBehaviour
 {
@@ -94,7 +151,7 @@ struct ScriptBehaviour
 		{
 			if (owner != nullptr)
 			{
-				return owner->transform;
+				return owner->GetTransform();
 			}
 		}
 		
@@ -108,12 +165,14 @@ struct ScriptBehaviour
 
 	bool _start = true;
 	bool isEnabled = true;
+	bool isBeingDestroyed = false;
 
 	enum class Class
 	{
 		Script,
 		Object,
-		Pointer
+		Pointer,
+		Static
 	};
 
 	Class ClassType = Class::Script;
@@ -141,6 +200,14 @@ struct ScriptBehaviour
 	ScriptBehaviour* CreateNewObject(ScriptBehaviour s) { ScriptBehaviour* newScript = new ScriptBehaviour(s); newScript->OnLoad(); return newScript; }
 
 	void StartScript();
+	void DestroyScript()
+	{
+		isBeingDestroyed = true;
+		OnDestroy();
+		delete this;
+	}
+
+	virtual void OnDestroy() { return; }
 
 	void AddMyselfToHierarchy();
 	void AddChild(ScriptBehaviour& child);
@@ -150,7 +217,7 @@ struct ScriptBehaviour
 	virtual void OnInternal() { return; }
 	virtual void OnStart() 
 	{
-		if (ClassType == Class::Script)
+		if (ClassType == Class::Script || ClassType == Class::Static)
 		{
 			Hierarchy::allUpdateScripts.push_back(this);
 		}
@@ -176,18 +243,14 @@ struct ScriptBehaviour
 	template <typename T>
 	T* GetScript()
 	{
-		if (typeid(T) == typeid(*this))
+		if (owner != nullptr)
+		{
+			return owner->GetScript<T>();
+		}
+		else if (typeid(T) == typeid(*this))
 		{
 			if (dynamic_cast<T*>(this))
 				return (T*)this;
-		}
-		else if (owner != nullptr)
-		{
-			if (typeid(T) == typeid(*owner))
-			{
-				if (dynamic_cast<T*>(owner))
-					return (T*)owner;
-			}
 		}
 		else
 		{

@@ -175,8 +175,26 @@ void SceneSaveAndLoad::StartSceneSave(void* sc)
 	sceneCppSave.clear();
 	Scene* scene = static_cast<Scene*>(sc);
 
+	if (sceneTITSSave != nullptr)
+	{
+		delete sceneTITSSave;
+		sceneTITSSave = nullptr;
+	}
+
 	sceneTITSSave = new YAML::Emitter();
 	*sceneTITSSave << YAML::BeginMap;
+
+	if (SceneSaveAndLoad::objectName != nullptr)
+	{
+		delete objectName;
+		objectName = nullptr;
+	}
+
+	if (allPointers != nullptr)
+	{
+		delete allPointers;
+		allPointers = nullptr;
+	}
 
 	allPointers = new std::ostringstream();
 	allPointers->clear();

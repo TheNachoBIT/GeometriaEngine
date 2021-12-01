@@ -1,5 +1,5 @@
 #include "Editor.h"
-#include "../geometria.h"
+#include "geometria.h"
 
 DrawCall* Editor::editorDrawCall;
 
@@ -20,6 +20,7 @@ ImGUIElement* Editor::Inspector, * Editor::FileBrowser, * Editor::HierarchyWindo
 * Editor::GameViewButton, * Editor::EditorViewButton;
 
 ScriptBehaviour* selectedObject;
+ImGUIElement* selectedItem;
 
 void FB_GoBack()
 {
@@ -79,7 +80,8 @@ void FB_ChangeWindowToGreen()
 void ChangeName(std::string* text, int* id)
 {
 	int copies = 0;
-	for (int i = 0; i < Editor::HierarchyWindow->allElements.size(); i++)
+	selectedItem->text = *text;
+	/*for (int i = 0; i < Editor::HierarchyWindow->allElements.size(); i++)
 	{
 		if (Editor::HierarchyWindow->allElements[i]->text == *text)
 		{
@@ -93,7 +95,7 @@ void ChangeName(std::string* text, int* id)
 			else
 				Editor::HierarchyWindow->allElements[i]->text = *text + " " + std::to_string(copies + 1);
 		}
-	}
+	}*/
 }
 
 void Hierarchy_Refresh()
@@ -111,9 +113,15 @@ void Hierarchy_Clicked(ImGUIElement* i, bool t)
 	}
 }
 
-void Hierarchy_Select(ScriptBehaviour* obj)
+void Hierarchy_Select(ScriptBehaviour* obj, ImGUIElement* item)
 {
 	selectedObject = obj;
+
+	if (selectedItem != nullptr)
+		selectedItem->clicked = false;
+
+	selectedItem = item;
+	selectedItem->clicked = true;
 	for (int i = 0; i < Editor::HierarchyWindow->allElements.size(); i++)
 	{
 		if (Editor::HierarchyWindow->allElements[i]->text != obj->objectClassName)
@@ -177,7 +185,7 @@ void RC_AddModelFromButton()
 		{
 			ImGUIElement* newModelButton = new ImGUIElement(ImGUIElement::GUIType::ListButton, *Editor::HierarchyWindow->allElements[i], newModel->objectClassName);
 			newModelButton->iRef = &newModel->scriptId;
-			newModelButton->OnClick(std::bind(Hierarchy_Select, newModel));
+			newModelButton->OnClick(std::bind(Hierarchy_Select, newModel, newModelButton));
 			Editor::EditorRightClick->isOpen = false;
 			break;
 		}
@@ -209,7 +217,7 @@ void Editor::Begin()
 {
 	Editor::actualHierarchySize = Hierarchy::allScripts.size();
 
-	editorDrawCall = new DrawCall(SceneManager::MainScene().CreateDrawCall());
+	editorDrawCall = SceneManager::MainScene().CreateDrawCall();
 	editorDrawCall->sort = DrawCall::Sorting::AtStartup;
 	editorDrawCall->type = DrawCall::Type::UI;
 	editorDrawCall->objectClassName = "Editor Draw Call";
@@ -266,15 +274,23 @@ void Editor::Begin()
 
 void Editor::SwitchEditorView()
 {
-	Editor::EditorViewButton->colorRef = new Color(1, 0.9, 0);
-	Editor::GameViewButton->colorRef = new Color(Color::white());
+	if (editorDrawCall != nullptr)
+	{
+		Editor::EditorViewButton->colorRef = new Color(1, 0.9, 0);
+		Editor::GameViewButton->colorRef = new Color(Color::white());
+	}
+
 	Graphics::MainCamera()->editorModeCamera = true;
 }
 
 void Editor::SwitchGameView()
 {
-	Editor::EditorViewButton->colorRef = new Color(Color::white());
-	Editor::GameViewButton->colorRef = new Color(1, 0.9, 0);
+	if (editorDrawCall != nullptr)
+	{
+		Editor::EditorViewButton->colorRef = new Color(Color::white());
+		Editor::GameViewButton->colorRef = new Color(1, 0.9, 0);
+	}
+
 	Graphics::MainCamera()->editorModeCamera = false;
 }
 
@@ -335,7 +351,7 @@ void Hierarchy_CreateItem(ScriptBehaviour& script, ImGUIElement* owner)
 		ImGUIElement* button = new ImGUIElement(ImGUIElement::GUIType::ListButton, *Editor::HierarchyWindow, script.objectClassName);
 		button->UITag = std::to_string(script.scriptId);
 		button->iRef = &script.scriptId;
-		button->OnClick(std::bind(Hierarchy_Select, &script));
+		button->OnClick(std::bind(Hierarchy_Select, &script, button));
 		owner = button;
 	}
 	else
@@ -343,12 +359,13 @@ void Hierarchy_CreateItem(ScriptBehaviour& script, ImGUIElement* owner)
 		ImGUIElement* button = new ImGUIElement(ImGUIElement::GUIType::ListButton, *owner, script.objectClassName);
 		button->UITag = std::to_string(script.scriptId);
 		button->iRef = &script.scriptId;
-		button->OnClick(std::bind(Hierarchy_Select, &script));
+		button->OnClick(std::bind(Hierarchy_Select, &script, button));
 	}
 
 	for (int i = 0; i < script.scripts.size(); i++)
 	{
-		Hierarchy_CreateItem(*script.objectsAndPointers[i], owner);
+		if(script.scripts[i]->ClassType != ScriptBehaviour::Class::Script)
+			Hierarchy_CreateItem(*script.scripts[i], owner);
 	}
 
 }
@@ -367,7 +384,7 @@ void Editor::HierarchyBegin()
 	Editor::HierarchyWindow->enableOpenAndClose = true;
 	Editor::HierarchyWindow->isOpen = lastHierarchyState;
 
-	Hierarchy_CreateItem(SceneManager::MainScene().MainDrawCall(), nullptr);
+	Hierarchy_CreateItem(*SceneManager::MainScene().MainDrawCall(), nullptr);
 
 	for (int i = 0; i < Editor::actualHierarchySize; i++)
 	{

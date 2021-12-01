@@ -27,6 +27,12 @@ void Model::DeleteModel()
 	d.deleteProcess = true;
 
 	RendererCore::ModifyVerticesOnBuffer(indexVertices, false, d);
+
+	vertices.clear();
+	std::vector<Vertex>().swap(vertices);
+
+	indexVertices.clear();
+	std::vector<int>().swap(indexVertices);
 }
 
 Matrix Model::SetTransformAndGetWorldMatrix(Vector3 position, Vector3 rotation, Vector3 scale)
@@ -56,6 +62,8 @@ void Model::SetVertices(Matrix matrix, std::vector<float> vertsToSet)
 		modelVertexData.push_back(vertsToSet[i]);
 	}
 
+	vertices.clear();
+	std::vector<Vertex>().swap(vertices);
 	vertices.resize(vertsToSet.size() / 4);
 
 	for (int i = 0; i < vertices.size(); i++)
@@ -82,6 +90,12 @@ void Model::SetTextureIntoModel(Model* model, std::string* path)
 
 	DrawCall& d = *RendererCore::FindDrawCall(model->SceneBelongsTo, model->DWBelongsTo);
 	d.Refresh();
+}
+
+void Model::OnStartup()
+{
+	//std::cout << "Model Applied!" << std::endl;
+	ClassType = Class::Pointer;
 }
 
 void Model::OnSave()
@@ -130,12 +144,10 @@ void Model::OnSave()
 
 void Model::OnInspector()
 {
-	ImGUIElement* NewLine = new ImGUIElement(ImGUIElement::GUIType::Text, *Editor::Inspector, "");
-	ImGUIElement* title = new ImGUIElement(ImGUIElement::GUIType::Text, *Editor::Inspector, "Model");
-	title->Alignment = ImGUIElement::AlignTo::Center;
+	VisualAccess_Title(Model);
 
-	ImGUIElement* colorButton = new ImGUIElement(ImGUIElement::GUIType::ColorEditorButtonRGBA, *Editor::Inspector, "Color", &color);
-	ImGUIElement* textureButton = new ImGUIElement(ImGUIElement::GUIType::FileSearch, *Editor::Inspector, "Texture", "No Texture Selected");
+	VisualAccess_AddValue(ColorEditorButtonRGBA, Color, &color);
+	VisualAccess_AddEditUIValue(textureButton, FileSearch, Texture, "No Texture Selected");
 
 	if(texture != nullptr)
 		textureButton->storedPath = texture->filename;

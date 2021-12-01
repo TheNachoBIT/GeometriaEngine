@@ -1,7 +1,11 @@
 #pragma once
 
 #ifndef BEHAVIOUR_H
-#include "../../Behaviours/Behaviour.h"
+#include "Behaviour.h"
+#endif
+
+#ifndef GEOMETRIA_H
+#include "geometria.h"
 #endif
 
 struct TestScript : public ScriptBehaviour

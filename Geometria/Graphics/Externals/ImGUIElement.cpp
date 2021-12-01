@@ -5,6 +5,8 @@
 #include "../Cores/MainAPI/Graphics.h"
 #include "../../Input/Input.h"
 
+bool ImGUIElement::_isMouseOnAnyWindow = false;
+
 void ImGUIElement::LoadElements()
 {
 	
@@ -14,6 +16,17 @@ void ImGUIElement::Move(Vector2 position)
 {
 	moveToPosition = position;
 	_requestForceMove = true;
+}
+
+void ImGUIElement::Scale(Vector2 scale)
+{
+	scaleTo = scale;
+	_requestForceScale = true;
+}
+
+bool ImGUIElement::IsMouseOnAnyWindow()
+{
+	return _isMouseOnAnyWindow;
 }
 
 void ImGUIElement::OpenWithMouseButton(int input)
@@ -164,10 +177,20 @@ void ImGUIElement::OnUpdate()
 		else
 			textFinal = text + "###" + UITag;
 
+		ImGuiWindowFlags window_flags = 0;
+
 		switch (guiType)
 		{
 		case GUIType::Window:
 			bool window;
+
+			if (!EnableResize) window_flags |= ImGuiWindowFlags_NoResize;
+			if (!EnableTitle) window_flags |= ImGuiWindowFlags_NoTitleBar;
+			if (!EnableScrolling) window_flags |= ImGuiWindowFlags_NoScrollbar;
+			if (!CanBeMoved) window_flags |= ImGuiWindowFlags_NoMove;
+
+			if (!SaveInFile)
+				ImGui::GetIO().IniFilename = NULL;
 
 			if (isOpen)
 			{
@@ -182,21 +205,44 @@ void ImGUIElement::OnUpdate()
 
 				if (_requestForceMove)
 				{
-					ImGui::SetNextWindowPos(ImVec2(moveToPosition.x, moveToPosition.y), ImGuiCond_Appearing);
-					std::cout << moveToPosition.x << " | " << moveToPosition.y << std::endl;
-					_requestForceMove = false;
+					ImGui::SetNextWindowPos(ImVec2(moveToPosition.x, moveToPosition.y), ImGuiCond_Once);
+				}
+
+				if (_requestForceScale)
+				{
+					ImGui::SetNextWindowSize(ImVec2(scaleTo.x, scaleTo.y), ImGuiCond_Once);
 				}
 
 				if (!enableOpenAndClose)
-					window = ImGui::Begin(textFinal.c_str());
+					window = ImGui::Begin(textFinal.c_str(), nullptr, window_flags);
 				else
-					window = ImGui::Begin(textFinal.c_str(), &isOpen);
+					window = ImGui::Begin(textFinal.c_str(), &isOpen, window_flags);
+
+				ImGUIElement::_isMouseOnAnyWindow = false;
 
 				if (window)
 				{
+					if (ImGui::IsWindowHovered())
+						ImGUIElement::_isMouseOnAnyWindow = true;
+
 					for (int i = 0; i < allElements.size(); i++)
 					{
 						allElements[i]->OnUpdate();
+					}
+
+					if (_requestForceMove)
+					{
+						if (ImGui::GetWindowPos().x == moveToPosition.x && ImGui::GetWindowPos().y == moveToPosition.y)
+						{
+							std::cout << "Window In Correct Place!" << std::endl;
+							_requestForceMove = false;
+						}
+					}
+
+					if (_requestForceScale)
+					{
+						if (ImGui::GetWindowSize().x == scaleTo.x && ImGui::GetWindowSize().y == scaleTo.y)
+							_requestForceScale = false;
 					}
 
 					ImGui::End();
@@ -206,6 +252,14 @@ void ImGUIElement::OnUpdate()
 			{
 				_lastOpenState = false;
 			}
+
+			if (!SaveInFile)
+				ImGui::GetIO().IniFilename = "imgui.ini";
+			break;
+
+		case GUIType::AppWindow:
+			guiType = Window;
+			EnableResize = EnableScrolling = EnableTitle = CanBeMoved = SaveInFile = false;
 			break;
 
 		case GUIType::MainMenuBar:

@@ -3,7 +3,7 @@
 
 //==[STATIC VARIABLES]==//
 
-bool Graphics::_init, Graphics::_close;
+bool Graphics::_init, Graphics::_close, Graphics::_bypassIntel;
 Window Graphics::_currentWindow;
 int Window::width;
 int Window::height;
@@ -66,7 +66,6 @@ bool Graphics::Exit()
 	glfwTerminate();
 	Graphics::_close = true;
 	_currentWindow.openGLWindow == nullptr;
-	exit(0);
 	return true;
 }
 

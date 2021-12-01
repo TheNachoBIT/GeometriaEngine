@@ -3,9 +3,10 @@
 
 int Hierarchy::highestScriptId = 0;
 std::vector<ScriptBehaviour*> Hierarchy::deleteList;
-std::vector<ScriptBehaviour*> Hierarchy::allScripts;
+std::vector<ScriptBehaviour*> Hierarchy::allScripts, Hierarchy::allStaticScripts;
 std::vector<ScriptBehaviour*> Hierarchy::allUpdateScripts, Hierarchy::allUpdateEditorScripts;
 std::vector<std::pair<std::string, ScriptBehaviour*>> Hierarchy::scriptsWithVisualAccess;
+std::vector<std::string> Hierarchy::listOfStaticScripts;
 bool Hierarchy::_setEditor = false;
 
 Matrix Transform::GetTransform()
@@ -68,6 +69,12 @@ void Hierarchy::EditorMode(bool e)
 	_setEditor = e;
 }
 
+void Hierarchy::AddScript(ScriptBehaviour* s)
+{
+	Hierarchy::allScripts.push_back(s);
+	Hierarchy::allScripts[Hierarchy::allScripts.size() - 1]->StartScript();
+}
+
 void ScriptBehaviour::StartScript()
 {
 	OnStartup();
@@ -75,14 +82,18 @@ void ScriptBehaviour::StartScript()
 
 	OnInternal();
 
-	if (ClassType == Class::Object || hasOwner)
+	if (ClassType == Class::Object || ClassType == Class::Static || hasOwner)
 	{
 		if (Application::_engineState == Application::State::Game)
+		{
 			OnStart();
-		else if(isEditor)
+		}
+		else if (isEditor)
+		{
 			OnEditorStart();
+		}
 
-		if (ClassType == Class::Script)
+		if (ClassType == Class::Script || ClassType == Class::Static)
 		{
 			if (isEditor)
 				Hierarchy::allUpdateEditorScripts.push_back(this);
@@ -100,14 +111,13 @@ void ScriptBehaviour::StartScript()
 
 void ScriptBehaviour::AddMyselfToHierarchy()
 {
-	Hierarchy::allScripts.push_back(this);
+	Hierarchy::AddScript(this);
 	scriptId = Hierarchy::highestScriptId;
 	Hierarchy::highestScriptId++;
 }
 
 void ScriptBehaviour::AddChild(ScriptBehaviour& child)
 {
-	std::cout << "Current ID: " << scriptId << std::endl;
 	scripts.push_back(&child);
 	child.hasOwner = true;
 }

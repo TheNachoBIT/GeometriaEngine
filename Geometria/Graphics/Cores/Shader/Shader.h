@@ -61,6 +61,8 @@ public:
 	void Enable() const;
 	void Disable() const;
 
+	void ClearFromRAM();
+
 	int LoadShader();
 private:
 	void Start();

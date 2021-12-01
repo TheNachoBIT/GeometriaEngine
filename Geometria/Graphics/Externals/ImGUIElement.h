@@ -109,7 +109,8 @@ public:
 		HelpMarker,
 		FileSearch,
 		Guizmo,
-		DragInt
+		DragInt,
+		AppWindow
 	};
 
 	GUIType guiType = GUIType::None;
@@ -123,15 +124,21 @@ public:
 
 	bool isOpen = true;
 	bool isEditor = true;
-	bool _lastOpenState = false, _requestForceMove = false;
+	bool _lastOpenState = false;
 	bool enableOpenAndClose = false;
 	bool isColored = false;
-	Vector2 moveToPosition;
+	Vector2 moveToPosition, scaleTo;
 	
 	void Move(Vector2 position);
+	void Scale(Vector2 scale);
+
+	bool _requestForceMove = false, _requestForceScale = false;
 
 	std::string text = "", secondText = "", textFinal = "", storedPath = "";
 	bool deleteMyself = false;
+
+	static bool IsMouseOnAnyWindow();
+	static bool _isMouseOnAnyWindow;
 
 	Vector2 size;
 
@@ -158,10 +165,19 @@ public:
 	enum AlignTo
 	{
 		Right,
-		Center
+		Center,
+		Left,
+		Top,
+		Bottom,
+		TopLeft,
+		TopRight,
+		BottomLeft,
+		BottomRight,
+		Nothing
 	};
 
 	AlignTo Alignment = AlignTo::Right;
+	AlignTo ScreenPivot = AlignTo::Nothing;
 
 	void OpenWithMouseButton(int input);
 
@@ -174,6 +190,12 @@ public:
 	int val = 0;
 	bool clicked = false;
 	std::string UITag;
+
+	bool EnableTitle = true;
+	bool EnableScrolling = true;
+	bool EnableResize = true;
+	bool CanBeMoved = true;
+	bool SaveInFile = true;
 
 	std::vector<std::function<void()>> onClickEvents {};
 
