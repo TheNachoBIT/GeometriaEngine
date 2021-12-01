@@ -259,3 +259,6 @@ paket-files/
 
 # RenderDoc Captures
 *.rdc
+
+# why the fuck did you forget about .vscode
+.vscode/
