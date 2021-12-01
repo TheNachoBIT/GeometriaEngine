@@ -81,10 +81,7 @@ class Model : public ScriptBehaviour
 {
 
 public:
-	void OnStartup()
-	{
-		ClassType = ScriptBehaviour::Class::Pointer;
-	}
+	void OnStartup();
 
 	void OnLoad()
 	{

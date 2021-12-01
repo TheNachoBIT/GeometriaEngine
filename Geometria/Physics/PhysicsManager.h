@@ -36,10 +36,14 @@ public:
 	static bool preUpdate;
 	static bool foundationCreated, physicsCreated, sceneCreated;
 
+	static Vector3 gravity;
+
 	void OnStartup();
 	void OnStart();
 	void OnUpdate();
 	void OnDestroy();
+
+	static void SetGravity(Vector3 g);
 
 	static physx::PxRigidStatic* CreateStaticBox(Vector3 position, Vector3 scale);
 	static physx::PxRigidDynamic* CreateDynamicBox(Vector3 position, Vector3 scale);

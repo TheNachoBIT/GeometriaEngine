@@ -5,6 +5,8 @@
 #include "../Cores/MainAPI/Graphics.h"
 #include "../../Input/Input.h"
 
+bool ImGUIElement::_isMouseOnAnyWindow = false;
+
 void ImGUIElement::LoadElements()
 {
 	
@@ -20,6 +22,11 @@ void ImGUIElement::Scale(Vector2 scale)
 {
 	scaleTo = scale;
 	_requestForceScale = true;
+}
+
+bool ImGUIElement::IsMouseOnAnyWindow()
+{
+	return _isMouseOnAnyWindow;
 }
 
 void ImGUIElement::OpenWithMouseButton(int input)
@@ -211,8 +218,13 @@ void ImGUIElement::OnUpdate()
 				else
 					window = ImGui::Begin(textFinal.c_str(), &isOpen, window_flags);
 
+				ImGUIElement::_isMouseOnAnyWindow = false;
+
 				if (window)
 				{
+					if (ImGui::IsWindowHovered())
+						ImGUIElement::_isMouseOnAnyWindow = true;
+
 					for (int i = 0; i < allElements.size(); i++)
 					{
 						allElements[i]->OnUpdate();

@@ -137,6 +137,9 @@ public:
 	std::string text = "", secondText = "", textFinal = "", storedPath = "";
 	bool deleteMyself = false;
 
+	static bool IsMouseOnAnyWindow();
+	static bool _isMouseOnAnyWindow;
+
 	Vector2 size;
 
 	struct

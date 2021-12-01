@@ -20,6 +20,7 @@ ImGUIElement* Editor::Inspector, * Editor::FileBrowser, * Editor::HierarchyWindo
 * Editor::GameViewButton, * Editor::EditorViewButton;
 
 ScriptBehaviour* selectedObject;
+ImGUIElement* selectedItem;
 
 void FB_GoBack()
 {
@@ -79,7 +80,8 @@ void FB_ChangeWindowToGreen()
 void ChangeName(std::string* text, int* id)
 {
 	int copies = 0;
-	for (int i = 0; i < Editor::HierarchyWindow->allElements.size(); i++)
+	selectedItem->text = *text;
+	/*for (int i = 0; i < Editor::HierarchyWindow->allElements.size(); i++)
 	{
 		if (Editor::HierarchyWindow->allElements[i]->text == *text)
 		{
@@ -93,7 +95,7 @@ void ChangeName(std::string* text, int* id)
 			else
 				Editor::HierarchyWindow->allElements[i]->text = *text + " " + std::to_string(copies + 1);
 		}
-	}
+	}*/
 }
 
 void Hierarchy_Refresh()
@@ -111,9 +113,15 @@ void Hierarchy_Clicked(ImGUIElement* i, bool t)
 	}
 }
 
-void Hierarchy_Select(ScriptBehaviour* obj)
+void Hierarchy_Select(ScriptBehaviour* obj, ImGUIElement* item)
 {
 	selectedObject = obj;
+
+	if (selectedItem != nullptr)
+		selectedItem->clicked = false;
+
+	selectedItem = item;
+	selectedItem->clicked = true;
 	for (int i = 0; i < Editor::HierarchyWindow->allElements.size(); i++)
 	{
 		if (Editor::HierarchyWindow->allElements[i]->text != obj->objectClassName)
@@ -177,7 +185,7 @@ void RC_AddModelFromButton()
 		{
 			ImGUIElement* newModelButton = new ImGUIElement(ImGUIElement::GUIType::ListButton, *Editor::HierarchyWindow->allElements[i], newModel->objectClassName);
 			newModelButton->iRef = &newModel->scriptId;
-			newModelButton->OnClick(std::bind(Hierarchy_Select, newModel));
+			newModelButton->OnClick(std::bind(Hierarchy_Select, newModel, newModelButton));
 			Editor::EditorRightClick->isOpen = false;
 			break;
 		}
@@ -343,7 +351,7 @@ void Hierarchy_CreateItem(ScriptBehaviour& script, ImGUIElement* owner)
 		ImGUIElement* button = new ImGUIElement(ImGUIElement::GUIType::ListButton, *Editor::HierarchyWindow, script.objectClassName);
 		button->UITag = std::to_string(script.scriptId);
 		button->iRef = &script.scriptId;
-		button->OnClick(std::bind(Hierarchy_Select, &script));
+		button->OnClick(std::bind(Hierarchy_Select, &script, button));
 		owner = button;
 	}
 	else
@@ -351,12 +359,13 @@ void Hierarchy_CreateItem(ScriptBehaviour& script, ImGUIElement* owner)
 		ImGUIElement* button = new ImGUIElement(ImGUIElement::GUIType::ListButton, *owner, script.objectClassName);
 		button->UITag = std::to_string(script.scriptId);
 		button->iRef = &script.scriptId;
-		button->OnClick(std::bind(Hierarchy_Select, &script));
+		button->OnClick(std::bind(Hierarchy_Select, &script, button));
 	}
 
 	for (int i = 0; i < script.scripts.size(); i++)
 	{
-		Hierarchy_CreateItem(*script.scripts[i], owner);
+		if(script.scripts[i]->ClassType != ScriptBehaviour::Class::Script)
+			Hierarchy_CreateItem(*script.scripts[i], owner);
 	}
 
 }

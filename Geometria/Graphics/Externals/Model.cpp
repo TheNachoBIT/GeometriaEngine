@@ -92,6 +92,12 @@ void Model::SetTextureIntoModel(Model* model, std::string* path)
 	d.Refresh();
 }
 
+void Model::OnStartup()
+{
+	//std::cout << "Model Applied!" << std::endl;
+	ClassType = Class::Pointer;
+}
+
 void Model::OnSave()
 {
 	SaveNewPointer(Model, Model::Square(),

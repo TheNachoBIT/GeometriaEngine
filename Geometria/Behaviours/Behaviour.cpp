@@ -69,6 +69,12 @@ void Hierarchy::EditorMode(bool e)
 	_setEditor = e;
 }
 
+void Hierarchy::AddScript(ScriptBehaviour* s)
+{
+	Hierarchy::allScripts.push_back(s);
+	Hierarchy::allScripts[Hierarchy::allScripts.size() - 1]->StartScript();
+}
+
 void ScriptBehaviour::StartScript()
 {
 	OnStartup();
@@ -79,9 +85,13 @@ void ScriptBehaviour::StartScript()
 	if (ClassType == Class::Object || ClassType == Class::Static || hasOwner)
 	{
 		if (Application::_engineState == Application::State::Game)
+		{
 			OnStart();
-		else if(isEditor)
+		}
+		else if (isEditor)
+		{
 			OnEditorStart();
+		}
 
 		if (ClassType == Class::Script || ClassType == Class::Static)
 		{
@@ -101,7 +111,7 @@ void ScriptBehaviour::StartScript()
 
 void ScriptBehaviour::AddMyselfToHierarchy()
 {
-	Hierarchy::allScripts.push_back(this);
+	Hierarchy::AddScript(this);
 	scriptId = Hierarchy::highestScriptId;
 	Hierarchy::highestScriptId++;
 }

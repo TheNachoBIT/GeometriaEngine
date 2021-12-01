@@ -11,6 +11,8 @@ bool PhysicsManager::foundationCreated = false;
 bool PhysicsManager::physicsCreated = false;
 bool PhysicsManager::sceneCreated = false;
 
+Vector3 PhysicsManager::gravity(0, -9.81, 0);
+
 std::vector<physx::PxRigidDynamic*> PhysicsManager::allDynamics;
 std::vector<physx::PxRigidStatic*> PhysicsManager::allStatics;
 
@@ -37,7 +39,7 @@ void PhysicsManager::OnStart()
 	}
 
 	physx::PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
-	sceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
+	sceneDesc.gravity = physx::PxVec3(gravity.x, gravity.y, gravity.z);
 	gDispatcher = physx::PxDefaultCpuDispatcherCreate(2);
 	sceneDesc.cpuDispatcher = gDispatcher;
 	sceneDesc.filterShader = physx::PxDefaultSimulationFilterShader;
@@ -81,8 +83,12 @@ void PhysicsManager::OnDestroy()
 
 	PhysicsManager::allStatics.clear();
 	std::vector<physx::PxRigidStatic*>().swap(PhysicsManager::allStatics);
+}
 
-
+void PhysicsManager::SetGravity(Vector3 g)
+{
+	gravity = g;
+	gScene->setGravity(physx::PxVec3(gravity.x, gravity.y, gravity.z));
 }
 
 physx::PxRigidStatic* PhysicsManager::CreateStaticBox(Vector3 position, Vector3 scale)

@@ -16,6 +16,7 @@ public:
 	static std::vector<std::string> listOfStaticScripts;
 	static bool _setEditor;
 	static void EditorMode(bool e);
+	static void AddScript(ScriptBehaviour* s);
 
 
 	static void StartScripts();
@@ -121,7 +122,15 @@ else\
 #define SaveInstruction(function) SceneSaveAndLoad::sceneCppSave << SceneSaveAndLoad::ModifyCode(#function) << std::endl
 #define SaveResourceInstructionAtEnd(function, group) SceneSaveAndLoad::CreateOrAddFunctionIntoStructureOnce(group, #function)
 
-#define SaveEnd() SceneSaveAndLoad::isSavePointer = false; SceneSaveAndLoad::sceneCppSave << "SceneSaveAndLoad::EndLoadArray();" << std::endl
+#define SaveNewScript(x)\
+std::string _SBSave_##x;\
+_SBSave_##x += "CurrentObject::AddScript<";\
+_SBSave_##x += #x;\
+_SBSave_##x += ">();";\
+SceneSaveAndLoad::sceneCppSave << SceneSaveAndLoad::ModifyCode(_SBSave_##x) << std::endl
+
+#define SaveEnd() for(int i = 0; i < scripts.size(); i++) { scripts[i]->OnSave(); }\
+SceneSaveAndLoad::isSavePointer = false; SceneSaveAndLoad::sceneCppSave << "SceneSaveAndLoad::EndLoadArray();" << std::endl
 
 struct ScriptBehaviour
 {
