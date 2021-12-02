@@ -160,67 +160,70 @@ int main(int argc, char** argv)
     {
         Input::UpdateKeyState();
 
-        //Camera controls example
-        if (Input::GetKey(GLFW_KEY_C) && speed == 4)
-            speed = 30;
-        else if (!Input::GetKey(GLFW_KEY_C) && speed == 30)
-            speed = 4;
-
-        if (Input::GetKeyDown(GLFW_KEY_TAB))
-            stopCamera = !stopCamera;
-
-        if (Input::GetKeyDown(GLFW_KEY_X))
+        if (!ImGUIElement::IsMouseOnAnyWindow())
         {
-            firstPerson = !firstPerson;
+            //Camera controls example
+            if (Input::GetKey(GLFW_KEY_C) && speed == 4)
+                speed = 30;
+            else if (!Input::GetKey(GLFW_KEY_C) && speed == 30)
+                speed = 4;
 
-            if(firstPerson)
-                glfwSetInputMode(Graphics::GetMainWindow().openGLWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            else
-                glfwSetInputMode(Graphics::GetMainWindow().openGLWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        }
+            if (Input::GetKeyDown(GLFW_KEY_TAB))
+                stopCamera = !stopCamera;
 
-        if (Input::GetKeyDown(GLFW_KEY_P))
-        {
-            switch (Application::_engineState)
+            if (Input::GetKeyDown(GLFW_KEY_X))
             {
-            case Application::State::Game:
-                Application::SetEditor();
-                Editor::SwitchEditorView();
-                std::cout << "State: Editing..." << std::endl;
-                break;
+                firstPerson = !firstPerson;
 
-            case Application::State::Editor:
-                Application::SetGame();
-                Editor::SwitchGameView();
-                std::cout << "State: Gaming..." << std::endl;
-                break;
-            }
-        }
-
-        if (!stopCamera)
-        {
-            if (Input::GetKey(GLFW_KEY_S))
-                Graphics::MainCamera()->editorPosition -= Graphics::MainCamera()->forward * speed * Graphics::DeltaTime();
-            if (Input::GetKey(GLFW_KEY_W))
-                Graphics::MainCamera()->editorPosition += Graphics::MainCamera()->forward * speed * Graphics::DeltaTime();
-            if (Input::GetKey(GLFW_KEY_A))
-                Graphics::MainCamera()->editorPosition -= Graphics::MainCamera()->right * speed * Graphics::DeltaTime();
-            if (Input::GetKey(GLFW_KEY_D))
-                Graphics::MainCamera()->editorPosition += Graphics::MainCamera()->right * speed * Graphics::DeltaTime();
-            if (Input::GetKey(GLFW_KEY_E))
-                Graphics::MainCamera()->editorPosition -= Graphics::MainCamera()->up * speed * Graphics::DeltaTime();
-            if (Input::GetKey(GLFW_KEY_Q))
-                Graphics::MainCamera()->editorPosition += Graphics::MainCamera()->up * speed * Graphics::DeltaTime();
-
-            if (Input::GetKeyDown(GLFW_KEY_Y))
-            {
-                if (!Graphics::MainCamera()->editorModeCamera)
-                {
-                    Editor::SwitchEditorView();
-                }
+                if (firstPerson)
+                    glfwSetInputMode(Graphics::GetMainWindow().openGLWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
                 else
+                    glfwSetInputMode(Graphics::GetMainWindow().openGLWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            }
+
+            if (Input::GetKeyDown(GLFW_KEY_P))
+            {
+                switch (Application::_engineState)
                 {
+                case Application::State::Game:
+                    Application::SetEditor();
+                    Editor::SwitchEditorView();
+                    std::cout << "State: Editing..." << std::endl;
+                    break;
+
+                case Application::State::Editor:
+                    Application::SetGame();
                     Editor::SwitchGameView();
+                    std::cout << "State: Gaming..." << std::endl;
+                    break;
+                }
+            }
+
+            if (!stopCamera)
+            {
+                if (Input::GetKey(GLFW_KEY_S))
+                    Graphics::MainCamera()->editorPosition -= Graphics::MainCamera()->forward * speed * Graphics::DeltaTime();
+                if (Input::GetKey(GLFW_KEY_W))
+                    Graphics::MainCamera()->editorPosition += Graphics::MainCamera()->forward * speed * Graphics::DeltaTime();
+                if (Input::GetKey(GLFW_KEY_A))
+                    Graphics::MainCamera()->editorPosition -= Graphics::MainCamera()->right * speed * Graphics::DeltaTime();
+                if (Input::GetKey(GLFW_KEY_D))
+                    Graphics::MainCamera()->editorPosition += Graphics::MainCamera()->right * speed * Graphics::DeltaTime();
+                if (Input::GetKey(GLFW_KEY_E))
+                    Graphics::MainCamera()->editorPosition -= Graphics::MainCamera()->up * speed * Graphics::DeltaTime();
+                if (Input::GetKey(GLFW_KEY_Q))
+                    Graphics::MainCamera()->editorPosition += Graphics::MainCamera()->up * speed * Graphics::DeltaTime();
+
+                if (Input::GetKeyDown(GLFW_KEY_Y))
+                {
+                    if (!Graphics::MainCamera()->editorModeCamera)
+                    {
+                        Editor::SwitchEditorView();
+                    }
+                    else
+                    {
+                        Editor::SwitchGameView();
+                    }
                 }
             }
         }

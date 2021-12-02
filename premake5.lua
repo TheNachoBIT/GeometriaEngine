@@ -18,6 +18,9 @@ IncludeDirectories["YAMLCPP"] = "Libraries/YAMLCPP/YAMLCPPCore/include"
 IncludeDirectories["NVIDIAPHYSX"] = "Libraries/NVIDIAPHYSX/include"
 IncludeDirectories["NVIDIAPHYSXSHARED"] = "Libraries/NVIDIAPHYSX/pxshared/include"
 
+include "Libraries/CURL"
+IncludeDirectories["CURL"] = "Libraries/CURL/include"
+
 
 project "Geometria"
 	kind "ConsoleApp"
@@ -41,7 +44,8 @@ project "Geometria"
 		"%{IncludeDirectories.GLEW}",
 		"%{IncludeDirectories.YAMLCPP}",
 		"%{IncludeDirectories.NVIDIAPHYSX}",
-		"%{IncludeDirectories.NVIDIAPHYSXSHARED}"
+		"%{IncludeDirectories.NVIDIAPHYSXSHARED}",
+		"%{IncludeDirectories.CURL}"
 	}
 	
 	filter "system:windows"
@@ -51,6 +55,7 @@ project "Geometria"
 	    	"GLFW",
 			"GLEW",
 			"yaml-cpp",
+			"curl-lib",
 			"opengl32.lib"
 	   }
 
@@ -60,6 +65,7 @@ project "Geometria"
 	   		"GLFW",
 			"GLEW",
 			"yaml-cpp",
+			"curl-lib",
 			"GL",
 			"pthread",
 			"m",

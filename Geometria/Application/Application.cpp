@@ -65,9 +65,9 @@ void Application::Start()
 
 	RendererCore::SetUp();
 
-	Application::SetEditor();
-
 	SampleScene::Init();
+
+	Application::SetEditor();
 
 	RendererCore::Start();
 

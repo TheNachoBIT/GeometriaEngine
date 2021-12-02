@@ -6,3 +6,4 @@
 #include "../Files/Files.h"
 #include "../Graphics/Cores/Texture/Texture.h"
 #include "../Compiler/CompilationCore.h"
+#include "../CommonObjects/Empty.h"

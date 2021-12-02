@@ -4,6 +4,7 @@
 #include "../Tools/Tools.h"
 #include "../Files/Scene/SceneFile.h"
 
+#define BEHAVIOUR_H
 struct ScriptBehaviour;
 class Hierarchy
 {
