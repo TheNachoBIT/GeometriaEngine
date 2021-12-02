@@ -56,7 +56,10 @@ project "Geometria"
 			"GLEW",
 			"yaml-cpp",
 			"curl-lib",
-			"opengl32.lib"
+			"opengl32.lib",
+			"crypt32.lib",
+			"wldap32.lib", 
+			"Ws2_32.lib"
 	   }
 
 	filter "system:linux"
@@ -89,7 +92,8 @@ project "Geometria"
 			"_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING",
 			"GLEW_STATIC",
 			"NDEBUG",
-			"_CONSOLE" 
+			"_CONSOLE",
+			"CURL_STATICLIB"
 		}
 		optimize "On"
 
