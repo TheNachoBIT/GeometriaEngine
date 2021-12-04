@@ -21,6 +21,9 @@ IncludeDirectories["NVIDIAPHYSXSHARED"] = "Libraries/NVIDIAPHYSX/pxshared/includ
 include "Libraries/CURL"
 IncludeDirectories["CURL"] = "Libraries/CURL/include"
 
+include "Libraries/ZLIB"
+IncludeDirectories["ZLIB"] = "Libraries/ZLIB"
+
 
 project "Geometria"
 	kind "ConsoleApp"
@@ -45,7 +48,8 @@ project "Geometria"
 		"%{IncludeDirectories.YAMLCPP}",
 		"%{IncludeDirectories.NVIDIAPHYSX}",
 		"%{IncludeDirectories.NVIDIAPHYSXSHARED}",
-		"%{IncludeDirectories.CURL}"
+		"%{IncludeDirectories.CURL}",
+		"%{IncludeDirectories.ZLIB}"
 	}
 	
 	filter "system:windows"
@@ -59,7 +63,8 @@ project "Geometria"
 			"opengl32.lib",
 			"crypt32.lib",
 			"wldap32.lib", 
-			"Ws2_32.lib"
+			"Ws2_32.lib",
+			"zlib"
 	   }
 
 	filter "system:linux"
@@ -69,6 +74,7 @@ project "Geometria"
 			"GLEW",
 			"yaml-cpp",
 			"curl-lib",
+			"zlib",
 			"GL",
 			"pthread",
 			"m",

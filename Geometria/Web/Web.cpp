@@ -71,7 +71,7 @@ std::string Web::Get(const char* urlLink, bool printProgress)
     return response_string;
 }
 
-std::string Web::Post(std::string url, const char* params)
+std::string Web::Post(const char* urlLink, const char* params)
 {
     CURL* curl;
     CURLcode res;
@@ -83,7 +83,7 @@ std::string Web::Post(std::string url, const char* params)
     /* get a curl handle */
     curl = curl_easy_init();
     if (curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, url);
+        curl_easy_setopt(curl, CURLOPT_URL, urlLink);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, params);
 
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeFunction);
