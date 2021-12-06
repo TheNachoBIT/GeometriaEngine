@@ -1,5 +1,7 @@
 #pragma once
 #define GEOMETRIA_H
+
+#include <regex>
 #include "../Graphics/Cores/MainAPI/Graphics.h"
 #include "../Graphics/Cores/Renderer/RendererCore.h"
 #include "../Graphics/Externals/SceneAndDrawCall.h"
@@ -9,4 +11,6 @@
 #include "../Compiler/CompilationCore.h"
 #include "../CommonObjects/Empty.h"
 #include "../Web/Web.h"
+#include "../WebRequest/WebRequest.h"
+
 #undef CreateWindow
