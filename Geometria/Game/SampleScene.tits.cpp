@@ -18,11 +18,22 @@ void SampleScene::Init() {
 	RendererCore::AddModel(*Model126);
 	SceneSaveAndLoad::EndLoadArray();
 
-	WebRequest webRequest = WebRequest("https://robotoskunk.com/");
+	WebRequest webRequest = WebRequest("https://robotoskunk.com/", WebRequest::HttpMethod::HTTP_POST);
 	WebResponse response = WebResponse();
 	WebForm form = WebForm();
+	form.AddField("Hi", "I love you! :D");
+
+	webRequest.cookies = "auth_token=test";
+	webRequest.headers.AddField("Oauth-Token", "another-test");
 
 	webRequest.SendWebRequest(&response, form);
 
-	std::cout << response.body << std::endl;
+	std::cout << "URL: " << response.url << std::endl;
+	std::cout << "Time Elapsed: " << response.timeElapsed << std::endl;
+	std::cout << "Response Code: " << response.code << std::endl;
+	std::cout << "MIME Type: " << response.mime << std::endl;
+	std::cout << "Headers Code: " << response.headers << std::endl;
+	std::cout << "Body: " << response.body << std::endl;
+
+	std::cout << WebTools::EncodeURIComponent("¡Hola! Esta es una prueba para verificar que esto funcione correctamente. ()\"'+?¡._-*¨[}ñ") << std::endl;
 }

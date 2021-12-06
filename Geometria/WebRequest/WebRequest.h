@@ -74,6 +74,7 @@ struct WebResponse {
 	unsigned int code;
 	float timeElapsed;
 	std::string body, headers, mime, url;
+	bool isDone;
 
 	float progress;
 };
@@ -84,7 +85,7 @@ private:
 public:
 	enum class HttpMethod { HTTP_GET, HTTP_HEAD, HTTP_POST, HTTP_PUT, HTTP_DELETE };
 
-	std::string url, cookies;
+	std::string url, cookies, acceptEncoding = "";
 	HttpMethod method;
 	WebForm headers;
 	unsigned int status, maxRedirects = 10;
