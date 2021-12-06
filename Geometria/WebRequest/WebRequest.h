@@ -87,6 +87,7 @@ struct WebResponse {
 class WebRequest {
 private:
 	void __startRequest(WebForm* form, WebResponse* response);
+	static void __startPrimitiveRequest(std::string url, std::string *postData, std::string *cookies, curl_slist *headers, WebResponse *response);
 public:
 	enum class HttpMethod { HTTP_GET, HTTP_HEAD, HTTP_POST, HTTP_PUT, HTTP_DELETE, CURL_DEFAULT };
 
@@ -95,6 +96,11 @@ public:
 	WebForm headers;
 	unsigned int status, maxRedirects = 10;
 	unsigned long maxTime = 60L;
+
+	WebRequest() {
+		this->url = "";
+		method = HttpMethod::HTTP_GET;
+	}
 
 	WebRequest(std::string url) {
 		this->url = url;
@@ -126,12 +132,24 @@ public:
 	}
 
 	// Starts a web request.
-	void SendWebRequest(WebResponse* response) {
+	void SendRequest(WebResponse* response) {
 		this->__startRequest(NULL, response);
 	}
 
 	// Starts a web request.
-	void SendWebRequest(WebResponse* response, WebForm form) {
+	void SendRequest(WebResponse* response, WebForm form) {
 		this->__startRequest(&form, response);
 	}
+
+	// Starts a web request using all defaults CURL configurations, ignoring all the WebRequest configuration.
+	static void SendPrimitiveRequest(WebResponse *response, std::string url);
+	
+	// Starts a web request using all defaults CURL configurations, ignoring all the WebRequest configuration.
+	static void SendPrimitiveRequest(WebResponse *response, std::string url, std::string postData);
+	
+	// Starts a web request using all defaults CURL configurations, ignoring all the WebRequest configuration.
+	static void SendPrimitiveRequest(WebResponse *response, std::string url, std::string postData, std::string *cookies);
+	
+	// Starts a web request using all defaults CURL configurations, ignoring all the WebRequest configuration.
+	static void SendPrimitiveRequest(WebResponse *response, std::string url, std::string postData, std::string *cookies, curl_slist *headers);
 };

@@ -19,11 +19,8 @@ void SampleScene::Init() {
 	SceneSaveAndLoad::EndLoadArray();
 
 	curl_global_init(CURL_GLOBAL_ALL);
-	WebRequest request("http://www.boomlings.com/database/downloadGJLevel22.php", WebRequest::HttpMethod::CURL_DEFAULT);
 	WebResponse response;
 	WebForm form;
-
-	request.maxRedirects = 0;
 
 	form.AddField("secret", "Wmfd2893gb7");
 	form.AddField("levelID", "1650666");
@@ -31,7 +28,7 @@ void SampleScene::Init() {
 	form.AddField("binaryVersion", "35");
 	form.AddField("gameVersion", "20");
 
-	request.SendWebRequest(&response, form);
+	WebRequest::SendPrimitiveRequest(&response, "http://www.boomlings.com/database/downloadGJLevel22.php", form.Parse());
 
 	std::cout << "-------------------------------------------" << std::endl;
 	std::cout << form.Parse() << std::endl;
@@ -49,7 +46,7 @@ void SampleScene::Init() {
 	webRequest.cookies = "auth_token=test";
 	webRequest.SetRequestHeader("Oauth-Token", "another-test");
 
-	webRequest.SendWebRequest(&response, form);
+	webRequest.SendRequest(&response, form);
 
 	std::cout << "URL: " << response.url << std::endl;
 	std::cout << "Time Elapsed: " << response.timeElapsed << std::endl;
