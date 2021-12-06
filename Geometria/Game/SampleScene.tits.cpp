@@ -23,4 +23,6 @@ void SampleScene::Init() {
 	WebForm form = WebForm();
 
 	webRequest.SendWebRequest(&response, form);
+
+	std::cout << response.body << std::endl;
 }

@@ -1,6 +1,9 @@
 #include "WebRequest.h"
 #include <regex>
 
+#define RSPrint(x) std::cout << x << std::endl
+
+#pragma region WebTools
 std::string WebTools::__escapeAll(std::regex regEx, std::string str) {
 	std::string encoded = "";
 
@@ -29,6 +32,7 @@ std::string WebTools::EncodeURIComponent(std::string uri) {
 
 	return encoded;
 }
+#pragma endregion
 
 #pragma region Curl Callbacks
 
@@ -36,6 +40,8 @@ int __curlProgressCallback(WebResponse* clientp, double dltotal, double dlnow, d
 	if (dltotal == 0.0) return 0;
 
 	clientp->progress = (float)dlnow / (float)dltotal;
+
+	RSPrint(clientp->progress);
 
 	return 0;
 }
@@ -66,7 +72,7 @@ void WebRequest::__startRequest(WebForm* form, WebResponse* response) {
 		curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, TRUE);
 
 		// Pass data
-		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, MethodToString());
+		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, MethodToString().c_str());
 		if (cookies != "") {
 			curl_easy_setopt(curl, CURLOPT_COOKIE, TRUE);
 			headers.AddField("Cookie", cookies);
@@ -89,11 +95,11 @@ void WebRequest::__startRequest(WebForm* form, WebResponse* response) {
 			case HttpMethod::HTTP_POST:
 			case HttpMethod::HTTP_PUT:
 			case HttpMethod::HTTP_DELETE:
-				curl_easy_setopt(curl, CURLOPT_POSTFIELDS, form->Parse());
+				curl_easy_setopt(curl, CURLOPT_POSTFIELDS, form->Parse().c_str());
 				break;
 			}
 		}
-		curl_easy_setopt(curl, CURLOPT_URL, requestUrl);
+		curl_easy_setopt(curl, CURLOPT_URL, requestUrl.c_str());
 
 		// Tracking progress
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, FALSE);
@@ -127,6 +133,8 @@ void WebRequest::__startRequest(WebForm* form, WebResponse* response) {
 		}
 
 		curl_easy_cleanup(curl);
+
+		curl = NULL;
 	}
 	else {
 		response->code = 10400;
@@ -135,7 +143,4 @@ void WebRequest::__startRequest(WebForm* form, WebResponse* response) {
 		response->progress = 1;
 		response->timeElapsed = 0.f;
 	}
-
-	// Clear memory
-	delete curl;
 }
