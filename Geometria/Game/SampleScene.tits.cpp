@@ -24,7 +24,7 @@ void SampleScene::Init() {
 	form.AddField("Hi", "I love you! :D");
 
 	webRequest.cookies = "auth_token=test";
-	webRequest.headers.AddField("Oauth-Token", "another-test");
+	webRequest.SetRequestHeader("Oauth-Token", "another-test");
 
 	webRequest.SendWebRequest(&response, form);
 
