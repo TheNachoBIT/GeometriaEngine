@@ -2,6 +2,8 @@
 #include "geometria.h"
 #include "../Physics/PhysicsManager.h"
 
+#define RSPrint(x) std::cout << x << std::endl
+
 Model* Model126;
 
 void SampleScene::Init() {
@@ -19,41 +21,52 @@ void SampleScene::Init() {
 	SceneSaveAndLoad::EndLoadArray();
 
 	curl_global_init(CURL_GLOBAL_ALL);
-	WebResponse response;
-	WebForm form;
+	WebResponse response1;
+	WebForm form1;
 
-	form.AddField("secret", "Wmfd2893gb7");
-	form.AddField("levelID", "1650666");
-	form.AddField("gdw", "0");
-	form.AddField("binaryVersion", "35");
-	form.AddField("gameVersion", "20");
+	form1.AddField("secret", "Wmfd2893gb7");
+	form1.AddField("levelID", "1650666");
+	form1.AddField("gdw", "0");
+	form1.AddField("binaryVersion", "35");
+	form1.AddField("gameVersion", "20");
 
-	WebRequest::SendPrimitiveRequest(&response, "http://www.boomlings.com/database/downloadGJLevel22.php", form.Parse());
+	WebRequest::SendPrimitiveRequest(&response1, "http://www.boomlings.com/database/downloadGJLevel22.php", form1.Parse());
 
-	std::cout << "-------------------------------------------" << std::endl;
-	std::cout << form.Parse() << std::endl;
-	std::cout << "-------------------------------------------" << std::endl;
-	std::cout << response.url << std::endl;
-	std::cout << response.headers << std::endl;
-	std::cout << response.body << std::endl;
-	std::cout << "-------------------------------------------" << std::endl;
+	RSPrint("-------------------------------------------");
+	RSPrint("---------------- Request 1 ----------------");
+	RSPrint("-------------------------------------------");
+	RSPrint(form1.Parse());
+	RSPrint("-------------------------------------------");
+	RSPrint("URL: " << response1.url);
+	RSPrint("Time Elapsed: " << response1.timeElapsed);
+	RSPrint("Response Code: " << response1.code);
+	RSPrint("MIME Type: " << response1.mime);
+	RSPrint("Headers: " << response1.headers);
+	RSPrint("Body: " << response1.body);
+	RSPrint("-------------------------------------------");
 
-	/*WebRequest webRequest = WebRequest("https://robotoskunk.com/?test=asd", WebRequest::HttpMethod::HTTP_GET);
-	WebResponse response = WebResponse();
-	WebForm form = WebForm();
-	form.AddField("Hi", "I love you! :D");
+	WebRequest webRequest2 = WebRequest("https://robotoskunk.com/?test=asd", WebRequest::HttpMethod::HTTP_GET);
+	WebResponse response2 = WebResponse();
+	WebForm form2 = WebForm();
+	form2.AddField("Hi", "I love you! :D");
 
-	webRequest.cookies = "auth_token=test";
-	webRequest.SetRequestHeader("Oauth-Token", "another-test");
+	webRequest2.cookies = "auth_token=test";
+	webRequest2.SetRequestHeader("Oauth-Token", "another-test");
 
-	webRequest.SendRequest(&response, form);
+	webRequest2.SendRequest(&response2, form2);
 
-	std::cout << "URL: " << response.url << std::endl;
-	std::cout << "Time Elapsed: " << response.timeElapsed << std::endl;
-	std::cout << "Response Code: " << response.code << std::endl;
-	std::cout << "MIME Type: " << response.mime << std::endl;
-	std::cout << "Headers Code: " << response.headers << std::endl;
-	std::cout << "Body: " << response.body << std::endl;
+	RSPrint("-------------------------------------------");
+	RSPrint("---------------- Request 2 ----------------");
+	RSPrint("-------------------------------------------");
+	RSPrint(form2.Parse());
+	RSPrint("-------------------------------------------");
+	RSPrint("URL: " << response2.url);
+	RSPrint("Time Elapsed: " << response2.timeElapsed);
+	RSPrint("Response Code: " << response2.code);
+	RSPrint("MIME Type: " << response2.mime);
+	RSPrint("Headers: " << response2.headers);
+	RSPrint("Body: " << response2.body);
+	RSPrint("-------------------------------------------");
 
-	std::cout << WebTools::EncodeURIComponent("¡Hola! Esta es una prueba para verificar que esto funcione correctamente. ()\"'+?¡._-*¨[}ñ") << std::endl;*/
+	std::cout << WebTools::EncodeURIComponent("¡Hola! Esta es una prueba para verificar que esto funcione correctamente. ()\"'+?¡._-*¨[}ñ") << std::endl;
 }

@@ -1,8 +1,6 @@
 #include "WebRequest.h"
 #include <regex>
 
-#define RSPrint(x) std::cout << x << std::endl
-
 #pragma region WebTools
 std::string WebTools::__escapeAll(std::regex regEx, std::string str) {
 	std::string encoded = "";
@@ -39,28 +37,79 @@ std::string WebTools::EncodeURIComponent(std::string uri) {
 
 #pragma region Curl Callbacks
 
-int __curlProgressCallback(WebResponse* clientp, double dltotal, double dlnow, double ultotal, double ulnow) {
+int WebRequest::__curlProgressCallback(WebResponse* clientp, double dltotal, double dlnow, double ultotal, double ulnow) {
 	if (dltotal == 0.0) return 0;
 
 	clientp->progress = (float)dlnow / (float)dltotal;
 
-	RSPrint(clientp->progress);
-
 	return 0;
 }
 
-size_t __curlWriterCallback(char* buffer, size_t size, size_t nmemb, WebResponse* clientp) {
+size_t WebRequest::__curlWriterCallback(char* buffer, size_t size, size_t nmemb, WebResponse* clientp) {
 	clientp->body += buffer;
 
 	return size * nmemb;
 }
 
-size_t __curlHeaderCallback(char* buffer, size_t size, size_t nitems, WebResponse* clientp) {
+size_t WebRequest::__curlHeaderCallback(char* buffer, size_t size, size_t nitems, WebResponse* clientp) {
 	clientp->headers += buffer;
 
 	return size * nitems;
 }
 
+#pragma endregion
+
+#pragma region CURL default calls
+void WebRequest::__curlNullPointerResponse(WebResponse *response) {
+	response->code = 10400;
+	response->body = "CURL init unknown error.";
+	response->mime = "text/plain";
+	response->isDone = true;
+}
+void WebRequest::__callCURL(CURL *curl, WebResponse *response) {
+	// Tracking progress
+	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, FALSE);
+	curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, __curlProgressCallback);
+	curl_easy_setopt(curl, CURLOPT_XFERINFODATA, response);
+
+	// Tracking body data
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, __curlWriterCallback);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, response);
+
+	// Tracking headers data
+	curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, __curlHeaderCallback);
+	curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
+
+	// Start CURL request
+	CURLcode res = curl_easy_perform(curl);
+
+	if (res == CURLE_OK) {
+		// Tracking status data
+		long statusCode, timeElapsed;
+		char *responseURL, *responseMIME;
+
+		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &statusCode);
+		curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &timeElapsed);
+		curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &responseURL);
+		curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &responseMIME);
+
+		response->code = statusCode;
+		response->timeElapsed = timeElapsed;
+		if (responseMIME != NULL) response->mime = responseMIME;
+		if (responseURL != NULL) response->url = responseURL;
+		response->isDone = true;
+	} else {
+		std::string error = curl_easy_strerror(res);
+
+		response->code = 10401;
+		response->body = "CURL internal error: " + error;
+		response->mime = "text/plain";
+		response->isDone = true;
+	}
+
+	curl_easy_cleanup(curl);
+	curl = NULL;
+}
 #pragma endregion
 
 #pragma region Primitive WebRequest
@@ -77,54 +126,10 @@ void WebRequest::__startPrimitiveRequest(std::string url, std::string *postData,
 		if (headers) curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 		if (postData) curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postData->c_str());
 
-		// Tracking progress
-		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, FALSE);
-		curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, __curlProgressCallback);
-		curl_easy_setopt(curl, CURLOPT_XFERINFODATA, response);
+		// Start CURL tracking and request
+		__callCURL(curl, response);
 
-		// Tracking body data
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, __curlWriterCallback);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, response);
-
-		// Tracking headers data
-		curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, __curlHeaderCallback);
-		curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
-
-		// Start CURL request
-		CURLcode res = curl_easy_perform(curl);
-
-		if (res == CURLE_OK) {
-			// Tracking status data
-			long statusCode, timeElapsed;
-			char *responseURL, *responseMIME;
-
-			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &statusCode);
-			curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &timeElapsed);
-			curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &responseURL);
-			curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &responseMIME);
-
-			response->code = statusCode;
-			response->timeElapsed = timeElapsed;
-			if (responseMIME != NULL) response->mime = responseMIME;
-			if (responseURL != NULL) response->url = responseURL;
-			response->isDone = true;
-		} else {
-			std::string error = curl_easy_strerror(res);
-
-			response->code = 10401;
-			response->body = "CURL internal error: " + error;
-			response->mime = "text/plain";
-			response->isDone = true;
-		}
-
-		curl_easy_cleanup(curl);
-		curl = NULL;
-	} else {
-		response->code = 10400;
-		response->body = "CURL init unknown error.";
-		response->mime = "text/plain";
-		response->isDone = true;
-	}
+	} else __curlNullPointerResponse(response);
 }
 
 void WebRequest::SendPrimitiveRequest(WebResponse *response, std::string url) {
@@ -140,97 +145,4 @@ void WebRequest::SendPrimitiveRequest(WebResponse *response, std::string url, st
 	__startPrimitiveRequest(url, &postData, cookies, headers, response);
 }
 #pragma endregion
-
-void WebRequest::__startRequest(WebForm* form, WebResponse* response) {
-	// Create CURL request
-	CURL* curl = curl_easy_init();
-
-	if (curl) {
-		// Start configuration
-		std::string requestUrl = url;
-		curl_easy_setopt(curl, CURLOPT_MAXREDIRS, (long)maxRedirects);
-		curl_easy_setopt(curl, CURLOPT_MAXLIFETIME_CONN, (long)maxTime);
-		curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, TRUE);
-		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, TRUE);
-		curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptEncoding.c_str());
-
-		// Pass data
-		std::string curlMethod = MethodToString();
-		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, (curlMethod == "CURL_DEFAULT" ? NULL : curlMethod.c_str()));
-
-		if (cookies != "")
-			curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
-		
-		struct curl_slist* headersList = NULL;
-		headers.ParseToCurlList(headersList, true);
-		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headersList);
-
-		// Prepare URL
-		if (form) {
-			switch (method) {
-			case HttpMethod::HTTP_GET:
-				requestUrl += (requestUrl.find('?') != std::string::npos ? '&' : '?') + form->Parse();
-				break;
-			case HttpMethod::HTTP_POST:
-			case HttpMethod::HTTP_PUT:
-			case HttpMethod::HTTP_DELETE:
-			case HttpMethod::CURL_DEFAULT:
-				curl_easy_setopt(curl, CURLOPT_POSTFIELDS, form->Parse().c_str());
-				break;
-			}
-		}
-		curl_easy_setopt(curl, CURLOPT_URL, requestUrl.c_str());
-
-		// Tracking progress
-		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, FALSE);
-		curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, __curlProgressCallback);
-		curl_easy_setopt(curl, CURLOPT_XFERINFODATA, response);
-
-		// Tracking body data
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, __curlWriterCallback);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, response);
-
-		// Tracking headers data
-		curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, __curlHeaderCallback);
-		curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
-
-		// Start CURL request
-		CURLcode res = curl_easy_perform(curl);
-
-		if (res == CURLE_OK) {
-			// Tracking status data
-			long statusCode, timeElapsed;
-			char *responseURL, *responseMIME;
-
-			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &statusCode);
-			curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &timeElapsed);
-			curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &responseURL);
-			curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &responseMIME);
-
-			response->code = statusCode;
-			response->timeElapsed = timeElapsed;
-			if (responseMIME != NULL) response->mime = responseMIME;
-			if (responseURL != NULL) response->url = responseURL;
-			response->isDone = true;
-		} else {
-			std::string error = curl_easy_strerror(res);
-
-			response->code = 10401;
-			response->body = "CURL internal error: " + error;
-			response->mime = "text/plain";
-			response->isDone = true;
-		}
-
-		curl_easy_cleanup(curl);
-		curl_slist_free_all(headersList);
-
-		headersList = NULL;
-		curl = NULL;
-	} else {
-		response->code = 10400;
-		response->body = "CURL init unknown error.";
-		response->mime = "text/plain";
-		response->isDone = true;
-	}
-}
 
