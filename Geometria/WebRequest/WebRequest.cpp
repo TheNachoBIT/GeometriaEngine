@@ -35,9 +35,7 @@ std::string WebTools::EncodeURIComponent(std::string uri) {
 int __curlProgressCallback(WebResponse* clientp, double dltotal, double dlnow, double ultotal, double ulnow) {
 	if (dltotal == 0.0) return 0;
 
-	float dp = dlnow / dltotal;
-
-	clientp->progress = dp;
+	clientp->progress = (float)dlnow / (float)dltotal;
 
 	return 0;
 }
