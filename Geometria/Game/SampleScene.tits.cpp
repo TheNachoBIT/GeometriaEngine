@@ -18,7 +18,7 @@ void SampleScene::Init() {
 	RendererCore::AddModel(*Model126);
 	SceneSaveAndLoad::EndLoadArray();
 
-	WebRequest webRequest = WebRequest("https://robotoskunk.com/", WebRequest::HttpMethod::HTTP_POST);
+	WebRequest webRequest = WebRequest("https://robotoskunk.com/?test=asd", WebRequest::HttpMethod::HTTP_GET);
 	WebResponse response = WebResponse();
 	WebForm form = WebForm();
 	form.AddField("Hi", "I love you! :D");

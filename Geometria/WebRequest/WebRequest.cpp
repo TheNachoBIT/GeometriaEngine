@@ -87,11 +87,9 @@ void WebRequest::__startRequest(WebForm* form, WebResponse* response) {
 
 		// Prepare URL
 		if (form) {
-			std::regex regEx("\\?");
-
 			switch (method) {
 			case HttpMethod::HTTP_GET:
-				if (std::regex_match(requestUrl, regEx))
+				if (requestUrl.find('?') != std::string::npos)
 					requestUrl += "&" + form->Parse();
 				else
 					requestUrl += "?" + form->Parse();
