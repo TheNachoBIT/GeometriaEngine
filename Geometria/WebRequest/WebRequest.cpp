@@ -32,29 +32,24 @@ std::string WebTools::EncodeURIComponent(std::string uri) {
 
 #pragma region Curl Callbacks
 
-int __curlProgressCallback(void* clientp, double dltotal, double dlnow, double ultotal, double ulnow) {
+int __curlProgressCallback(WebResponse* clientp, double dltotal, double dlnow, double ultotal, double ulnow) {
 	if (dltotal == 0.0) return 0;
 
-	WebResponse* downloader = static_cast<WebResponse*>(clientp);
 	float dp = dlnow / dltotal;
 
-	downloader->progress = dp;
+	clientp->progress = dp;
 
 	return 0;
 }
 
-size_t __curlWriterCallback(void* buffer, size_t size, size_t nmemb, void* clientp) {
-	WebResponse* downloader = static_cast<WebResponse*>(clientp);
-
-	downloader->body += (char*)buffer;
+size_t __curlWriterCallback(char* buffer, size_t size, size_t nmemb, WebResponse* clientp) {
+	clientp->body += buffer;
 
 	return size * nmemb;
 }
 
-size_t __curlHeaderCallback(char* buffer, size_t size, size_t nitems, void* clientp) {
-	WebResponse* downloader = static_cast<WebResponse*>(clientp);
-
-	downloader->headers += (char*)buffer;
+size_t __curlHeaderCallback(char* buffer, size_t size, size_t nitems, WebResponse* clientp) {
+	clientp->headers += buffer;
 
 	return size * nitems;
 }
