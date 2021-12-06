@@ -88,7 +88,7 @@ class WebRequest {
 private:
 	void __startRequest(WebForm* form, WebResponse* response);
 public:
-	enum class HttpMethod { HTTP_GET, HTTP_HEAD, HTTP_POST, HTTP_PUT, HTTP_DELETE };
+	enum class HttpMethod { HTTP_GET, HTTP_HEAD, HTTP_POST, HTTP_PUT, HTTP_DELETE, CURL_DEFAULT };
 
 	std::string url, cookies, acceptEncoding = "";
 	HttpMethod method;
@@ -119,6 +119,7 @@ public:
 			case HttpMethod::HTTP_POST: return "POST";
 			case HttpMethod::HTTP_PUT: return "PUT";
 			case HttpMethod::HTTP_DELETE: return "DELETE";
+			case HttpMethod::CURL_DEFAULT: return "CURL_DEFAULT";
 		}
 
 		return "GET";

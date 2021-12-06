@@ -18,7 +18,30 @@ void SampleScene::Init() {
 	RendererCore::AddModel(*Model126);
 	SceneSaveAndLoad::EndLoadArray();
 
-	WebRequest webRequest = WebRequest("https://robotoskunk.com/?test=asd", WebRequest::HttpMethod::HTTP_GET);
+	curl_global_init(CURL_GLOBAL_ALL);
+	WebRequest request("http://www.boomlings.com/database/downloadGJLevel22.php", WebRequest::HttpMethod::CURL_DEFAULT);
+	WebResponse response;
+	WebForm form;
+
+	request.maxRedirects = 0;
+
+	form.AddField("secret", "Wmfd2893gb7");
+	form.AddField("levelID", "1650666");
+	form.AddField("gdw", "0");
+	form.AddField("binaryVersion", "35");
+	form.AddField("gameVersion", "20");
+
+	request.SendWebRequest(&response, form);
+
+	std::cout << "-------------------------------------------" << std::endl;
+	std::cout << form.Parse() << std::endl;
+	std::cout << "-------------------------------------------" << std::endl;
+	std::cout << response.url << std::endl;
+	std::cout << response.headers << std::endl;
+	std::cout << response.body << std::endl;
+	std::cout << "-------------------------------------------" << std::endl;
+
+	/*WebRequest webRequest = WebRequest("https://robotoskunk.com/?test=asd", WebRequest::HttpMethod::HTTP_GET);
 	WebResponse response = WebResponse();
 	WebForm form = WebForm();
 	form.AddField("Hi", "I love you! :D");
@@ -35,5 +58,5 @@ void SampleScene::Init() {
 	std::cout << "Headers Code: " << response.headers << std::endl;
 	std::cout << "Body: " << response.body << std::endl;
 
-	std::cout << WebTools::EncodeURIComponent("¡Hola! Esta es una prueba para verificar que esto funcione correctamente. ()\"'+?¡._-*¨[}ñ") << std::endl;
+	std::cout << WebTools::EncodeURIComponent("¡Hola! Esta es una prueba para verificar que esto funcione correctamente. ()\"'+?¡._-*¨[}ñ") << std::endl;*/
 }

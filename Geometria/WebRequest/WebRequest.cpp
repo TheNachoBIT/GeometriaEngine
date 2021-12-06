@@ -77,10 +77,12 @@ void WebRequest::__startRequest(WebForm* form, WebResponse* response) {
 		curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptEncoding.c_str());
 
 		// Pass data
-		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, MethodToString().c_str());
-		if (cookies != "") {
+		std::string curlMethod = MethodToString();
+		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, (curlMethod == "CURL_DEFAULT" ? NULL : curlMethod.c_str()));
+
+		if (cookies != "")
 			curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
-		}
+		
 		struct curl_slist* headersList = NULL;
 		headers.ParseToCurlList(headersList, true);
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headersList);
@@ -89,14 +91,12 @@ void WebRequest::__startRequest(WebForm* form, WebResponse* response) {
 		if (form) {
 			switch (method) {
 			case HttpMethod::HTTP_GET:
-				if (requestUrl.find('?') != std::string::npos)
-					requestUrl += "&" + form->Parse();
-				else
-					requestUrl += "?" + form->Parse();
+				requestUrl += (requestUrl.find('?') != std::string::npos ? '&' : '?') + form->Parse();
 				break;
 			case HttpMethod::HTTP_POST:
 			case HttpMethod::HTTP_PUT:
 			case HttpMethod::HTTP_DELETE:
+			case HttpMethod::CURL_DEFAULT:
 				curl_easy_setopt(curl, CURLOPT_POSTFIELDS, form->Parse().c_str());
 				break;
 			}
@@ -148,8 +148,7 @@ void WebRequest::__startRequest(WebForm* form, WebResponse* response) {
 
 		headersList = NULL;
 		curl = NULL;
-	}
-	else {
+	} else {
 		response->code = 10400;
 		response->body = "CURL init unknown error.";
 		response->mime = "text/plain";
