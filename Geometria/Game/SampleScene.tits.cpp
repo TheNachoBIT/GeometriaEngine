@@ -73,9 +73,8 @@ void SampleScene::Init() {
 		std::cout << WebTools::EncodeURIComponent("¡Hola! Esta es una prueba para verificar que esto funcione correctamente. ()\"'+?¡._-*¨[}ñ") << std::endl;
 	};
 
-	std::thread th(lambda, &response2);
-	th.join();
+	std::async(std::launch::async, lambda, &response2);
 
-	/*auto thread = ThreadsManager::CreateThread(lambda, &response2);
-	ThreadsManager::StartThread(thread);*/
+	/*auto thread = ThreadsManager::CreateThread(lambda);
+	ThreadsManager::StartThread<void>(thread, &response2);*/
 }

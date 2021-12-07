@@ -2,23 +2,22 @@
 
 #include <functional>
 #include <thread>
+#include <future>
 #include "geometria.h"
 
 typedef unsigned long int threadID;
 
-struct ThreadPair {
-	threadID id;
-	std::thread *th;
-};
-
 class ThreadsManager {
 private:
+	struct __threadPair;
 	static threadID __tid;
-	static std::list <ThreadPair> __tlist;
+	static std::list <__threadPair> __tlist;
 public:
-	template <class Func, class... Args>
-	static threadID CreateThread(Func&& func, Args&&... args);
-	static void StartThread(threadID id);
+	template <class Func>
+	static threadID CreateThread(Func&& func);
+
+	template <class T, class... Args>
+	static std::future<T> *StartThread(threadID id, Args&&... args);
+
 	static void StopThread(threadID id);
-	static std::thread *GetThread(threadID id);
 };

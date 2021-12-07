@@ -1,53 +1,44 @@
 #include "ThreadsManager.h"
 
 typedef unsigned long int threadID;
-std::list<ThreadPair> ThreadsManager::__tlist;
 
-template <class Func, class... Args>
-threadID ThreadsManager::CreateThread(Func &&func, Args&&... args) {
-	std::thread *th(func, args);
+struct ThreadsManager::__threadPair {
+	threadID id;
+	void* func;
+};
 
+std::list<ThreadsManager::__threadPair> ThreadsManager::__tlist;
+
+template <class Func>
+threadID ThreadsManager::CreateThread(Func&& func) {
 	__tid++;
-	ThreadPair pair = ThreadPair();
+	__threadPair pair = __threadPair();
 	pair.id = __tid;
-	pair.th = th;
+	pair.func = func;
 
 	__tlist.push_back(pair);
 }
 
-void ThreadsManager::StartThread(threadID id) {
-	std::list<ThreadPair>::iterator it;
+template <class T, class... Args>
+std::future<T> *ThreadsManager::StartThread(threadID id, Args&&... args) {
+	std::list<__threadPair>::iterator it;
 
 	for (it = __tlist.begin(); it != __tlist.end(); it++) {
 		if (it->id == id) {
-			it->th->join();
-			break;
-		}
-	}
-}
-
-void ThreadsManager::StopThread(threadID id) {
-	std::list<ThreadPair>::iterator it;
-
-	for (it = __tlist.begin(); it != __tlist.end(); it++) {
-		if (it->id == id) {
-			it->th->~thread();
-			delete it->th;
-			__tlist.erase(it);
-			break;
-		}
-	}
-}
-
-std::thread *ThreadsManager::GetThread(threadID id) {
-	std::list<ThreadPair>::iterator it;
-
-	for (it = __tlist.begin(); it != __tlist.end(); it++) {
-		if (it->id == id) {
-			return it->th;
-			break;
+			return std::async(std::launch::async, it->func, args);
 		}
 	}
 
 	return NULL;
+}
+
+void ThreadsManager::StopThread(threadID id) {
+	std::list<__threadPair>::iterator it;
+
+	for (it = __tlist.begin(); it != __tlist.end(); it++) {
+		if (it->id == id) {
+			__tlist.erase(it);
+			break;
+		}
+	}
 }
