@@ -38,9 +38,8 @@ std::string WebTools::EncodeURIComponent(std::string uri) {
 #pragma region Curl Callbacks
 
 int WebRequest::__curlProgressCallback(WebResponse* clientp, double dltotal, double dlnow, double ultotal, double ulnow) {
-	if (dltotal == 0.0) return 0;
-
-	clientp->progress = (float)dlnow / (float)dltotal;
+	if (dltotal != 0.0) clientp->downloadProgress = dlnow / dltotal;
+	if (ultotal != 0.0) clientp->uploadProgress = ulnow / ultotal;
 
 	return 0;
 }
@@ -85,19 +84,24 @@ void WebRequest::__callCURL(CURL *curl, WebResponse *response) {
 
 	if (res == CURLE_OK) {
 		// Tracking status data
-		long statusCode, timeElapsed;
+		long *statusCode = 0L;
+		float timeElapsed;
 		char *responseURL, *responseMIME;
 
-		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &statusCode);
 		curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &timeElapsed);
 		curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &responseURL);
 		curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &responseMIME);
+		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, statusCode);
 
-		response->code = statusCode;
+		response->code = (unsigned int)statusCode;
 		response->timeElapsed = timeElapsed;
 		if (responseMIME != NULL) response->mime = responseMIME;
 		if (responseURL != NULL) response->url = responseURL;
 		response->isDone = true;
+
+		statusCode = NULL;
+		responseMIME = NULL;
+		responseURL = NULL;
 	} else {
 		std::string error = curl_easy_strerror(res);
 

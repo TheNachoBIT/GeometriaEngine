@@ -78,10 +78,9 @@ struct WebForm {
 struct WebResponse {
 	unsigned int code;
 	float timeElapsed;
+	double downloadProgress, uploadProgress;
 	std::string body, headers, mime, url;
 	bool isDone;
-
-	float progress;
 };
 
 class WebRequest {
@@ -94,9 +93,11 @@ private:
 			// Start configuration
 			std::string requestUrl = url;
 			curl_easy_setopt(curl, CURLOPT_MAXREDIRS, (long)maxRedirects);
-			curl_easy_setopt(curl, CURLOPT_MAXLIFETIME_CONN, (long)maxTime);
+			curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, timeout);
+			curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
 			curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, TRUE);
 			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, TRUE);
+			curl_easy_setopt(curl, CURLOPT_AUTOREFERER, TRUE);
 			curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptEncoding.c_str());
 
 			// Pass data
@@ -149,7 +150,7 @@ public:
 	HttpMethod method;
 	WebForm headers;
 	unsigned int status, maxRedirects = 10;
-	unsigned long maxTime = 60L;
+	unsigned long timeout = 60L;
 
 	WebRequest() {
 		this->url = "";

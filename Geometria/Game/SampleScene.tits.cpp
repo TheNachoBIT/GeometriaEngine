@@ -45,7 +45,7 @@ void SampleScene::Init() {
 	RSPrint("Body: " << response1.body);
 	RSPrint("-------------------------------------------");
 
-	WebRequest webRequest2 = WebRequest("https://robotoskunk.com/?test=asd", WebRequest::HttpMethod::HTTP_GET);
+	WebRequest webRequest2 = WebRequest("https://robotoskunk.com/?test=asd");
 	WebResponse response2 = WebResponse();
 	WebForm form2 = WebForm();
 	form2.AddField("Hi", "I love you! :D");
