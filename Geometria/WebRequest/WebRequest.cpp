@@ -142,11 +142,11 @@ void WebRequest::SendPrimitiveRequest(WebResponse *response, std::string url) {
 void WebRequest::SendPrimitiveRequest(WebResponse *response, std::string url, std::string postData) {
 	__startPrimitiveRequest(url, &postData, NULL, NULL, response);
 }
-void WebRequest::SendPrimitiveRequest(WebResponse *response, std::string url, std::string postData, std::string *cookies) {
-	__startPrimitiveRequest(url, &postData, cookies, NULL, response);
+void WebRequest::SendPrimitiveRequest(WebResponse *response, std::string url, std::string postData, std::string cookies) {
+	__startPrimitiveRequest(url, &postData, &cookies, NULL, response);
 }
-void WebRequest::SendPrimitiveRequest(WebResponse *response, std::string url, std::string postData, std::string *cookies, curl_slist *headers) {
-	__startPrimitiveRequest(url, &postData, cookies, headers, response);
+void WebRequest::SendPrimitiveRequest(WebResponse *response, std::string url, std::string postData, std::string cookies, curl_slist *headers) {
+	__startPrimitiveRequest(url, &postData, &cookies, headers, response);
 }
 #pragma endregion
 

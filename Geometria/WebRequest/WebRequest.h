@@ -203,8 +203,8 @@ public:
 	static void SendPrimitiveRequest(WebResponse *response, std::string url, std::string postData);
 	
 	// Starts a web request using all defaults CURL configurations, ignoring all the WebRequest configuration.
-	static void SendPrimitiveRequest(WebResponse *response, std::string url, std::string postData, std::string *cookies);
+	static void SendPrimitiveRequest(WebResponse *response, std::string url, std::string postData, std::string cookies);
 	
 	// Starts a web request using all defaults CURL configurations, ignoring all the WebRequest configuration.
-	static void SendPrimitiveRequest(WebResponse *response, std::string url, std::string postData, std::string *cookies, curl_slist *headers);
+	static void SendPrimitiveRequest(WebResponse *response, std::string url, std::string postData, std::string cookies, curl_slist *headers);
 };
