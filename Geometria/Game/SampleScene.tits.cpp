@@ -45,28 +45,37 @@ void SampleScene::Init() {
 	RSPrint("Body: " << response1.body);
 	RSPrint("-------------------------------------------");
 
-	WebRequest webRequest2 = WebRequest("https://robotoskunk.com/?test=asd");
 	WebResponse response2 = WebResponse();
-	WebForm form2 = WebForm();
-	form2.AddField("Hi", "I love you! :D");
+	auto lambda = [](WebResponse *response2) {
+		WebRequest webRequest2 = WebRequest("https://robotoskunk.com/?test=asd");
 
-	webRequest2.cookies = "auth_token=test";
-	webRequest2.SetRequestHeader("Oauth-Token", "another-test");
+		WebForm form2 = WebForm();
+		form2.AddField("Hi", "I love you! :D");
 
-	webRequest2.SendRequest(&response2, form2);
+		webRequest2.cookies = "auth_token=test";
+		webRequest2.SetRequestHeader("Oauth-Token", "another-test");
 
-	RSPrint("-------------------------------------------");
-	RSPrint("---------------- Request 2 ----------------");
-	RSPrint("-------------------------------------------");
-	RSPrint(form2.Parse());
-	RSPrint("-------------------------------------------");
-	RSPrint("URL: " << response2.url);
-	RSPrint("Time Elapsed: " << response2.timeElapsed);
-	RSPrint("Response Code: " << response2.code);
-	RSPrint("MIME Type: " << response2.mime);
-	RSPrint("Headers: " << response2.headers);
-	RSPrint("Body: " << response2.body);
-	RSPrint("-------------------------------------------");
+		webRequest2.SendRequest(response2, form2);
 
-	std::cout << WebTools::EncodeURIComponent("¡Hola! Esta es una prueba para verificar que esto funcione correctamente. ()\"'+?¡._-*¨[}ñ") << std::endl;
+		RSPrint("-------------------------------------------");
+		RSPrint("---------------- Request 2 ----------------");
+		RSPrint("-------------------------------------------");
+		RSPrint(form2.Parse());
+		RSPrint("-------------------------------------------");
+		RSPrint("URL: " << response2->url);
+		RSPrint("Time Elapsed: " << response2->timeElapsed);
+		RSPrint("Response Code: " << response2->code);
+		RSPrint("MIME Type: " << response2->mime);
+		RSPrint("Headers: " << response2->headers);
+		RSPrint("Body: " << response2->body);
+		RSPrint("-------------------------------------------");
+
+		std::cout << WebTools::EncodeURIComponent("¡Hola! Esta es una prueba para verificar que esto funcione correctamente. ()\"'+?¡._-*¨[}ñ") << std::endl;
+	};
+
+	std::thread th(lambda, &response2);
+	th.join();
+
+	/*auto thread = ThreadsManager::CreateThread(lambda, &response2);
+	ThreadsManager::StartThread(thread);*/
 }

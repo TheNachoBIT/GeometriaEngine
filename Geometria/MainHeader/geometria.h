@@ -12,5 +12,6 @@
 #include "../CommonObjects/Empty.h"
 #include "../Web/Web.h"
 #include "../WebRequest/WebRequest.h"
+#include "../ThreadsManager/ThreadsManager.h"
 
 #undef CreateWindow
