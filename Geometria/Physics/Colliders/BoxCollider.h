@@ -24,5 +24,6 @@ struct BoxCollider : public ScriptBehaviour
 
 	void OnStart();
 	void OnInspector();
+	void OnSave();
 	void OnUpdate();
 };

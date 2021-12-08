@@ -11,6 +11,7 @@ std::vector<std::pair<std::string, ScriptBehaviour*>> SceneSaveAndLoad::BaseClas
 std::vector<YAML::Node> SceneSaveAndLoad::dataArrayVector;
 std::ostringstream SceneSaveAndLoad::sceneCppSave;
 std::ostringstream* SceneSaveAndLoad::objectName, * SceneSaveAndLoad::allPointers;
+std::string SceneSaveAndLoad::scriptName, SceneSaveAndLoad::allIncludes;
 YAML::Emitter* SceneSaveAndLoad::sceneTITSSave;
 YAML::Node SceneSaveAndLoad::loadTITS;
 std::vector<std::string> SceneSaveAndLoad::loadArray;
@@ -36,7 +37,16 @@ std::string SceneSaveAndLoad::ModifyCode(std::string string)
 	std::string str = string;
 	std::ostringstream name;
 
-	if (SceneSaveAndLoad::objectName != nullptr)
+	if (SceneSaveAndLoad::scriptName != "")
+	{
+		name << SceneSaveAndLoad::scriptName << "->";
+
+		while (str.find("CurrentObject::") != std::string::npos)
+			str.replace(str.find("CurrentObject::"), std::string("CurrentObject::").length(), name.str());
+
+		return str;
+	}
+	else if (SceneSaveAndLoad::objectName != nullptr)
 	{
 		name << SceneSaveAndLoad::objectName->str() << "->";
 
@@ -190,6 +200,8 @@ void SceneSaveAndLoad::StartSceneSave(void* sc)
 		objectName = nullptr;
 	}
 
+	allIncludes = "";
+
 	if (allPointers != nullptr)
 	{
 		delete allPointers;
@@ -222,7 +234,9 @@ void SceneSaveAndLoad::StartSceneSave(void* sc)
 
 	std::ostringstream finalFile;
 
-	finalFile << "#include \"SampleScene.tits.h\"" << std::endl << "#include \"../geometria.h\"" << std::endl << std::endl;
+	finalFile << "#include \"SampleScene.tits.h\"" << std::endl << "#include \"geometria.h\"" << std::endl << std::endl;
+	finalFile << SceneSaveAndLoad::allIncludes << std::endl;
+
 	finalFile << allPointers->str() << std::endl;
 	finalFile << "void SampleScene::Init()" << std::endl << "{" << std::endl;
 	finalFile << "SceneSaveAndLoad::StartSceneLoad(\"Game/SampleScene.tits\");" << std::endl;
@@ -266,7 +280,11 @@ std::string SceneSaveAndLoad::SaveValueToTITS(std::string name, int value)
 {
 	std::ostringstream finalName;
 
-	if (SceneSaveAndLoad::objectName != nullptr)
+	if (SceneSaveAndLoad::scriptName != "")
+	{
+		finalName << SceneSaveAndLoad::scriptName << Type() << name;
+	}
+	else if (SceneSaveAndLoad::objectName != nullptr)
 	{
 		finalName << SceneSaveAndLoad::objectName->str() << Type() << name;
 	}
@@ -294,7 +312,14 @@ std::string SceneSaveAndLoad::SaveValueToTITS(std::string name, int value)
 std::string SceneSaveAndLoad::SaveValueToTITS(std::string name, std::string value)
 {
 	std::ostringstream finalName;
-	finalName << SceneSaveAndLoad::objectName->str() << Type() << name;
+	if (SceneSaveAndLoad::scriptName != "")
+	{
+		finalName << SceneSaveAndLoad::scriptName << Type() << name;
+	}
+	else if (SceneSaveAndLoad::objectName != nullptr)
+	{
+		finalName << SceneSaveAndLoad::objectName->str() << Type() << name;
+	}
 
 	//Save Into .tits file
 	std::string changeV = value;
@@ -316,7 +341,14 @@ std::string SceneSaveAndLoad::SaveValueToTITS(std::string name, std::string valu
 std::string SceneSaveAndLoad::SaveValueToTITS(std::string name, float value)
 {
 	std::ostringstream finalName;
-	finalName << SceneSaveAndLoad::objectName->str() << Type() << name;
+	if (SceneSaveAndLoad::scriptName != "")
+	{
+		finalName << SceneSaveAndLoad::scriptName << Type() << name;
+	}
+	else if (SceneSaveAndLoad::objectName != nullptr)
+	{
+		finalName << SceneSaveAndLoad::objectName->str() << Type() << name;
+	}
 
 	//Save Into .tits file
 

@@ -16,8 +16,12 @@ std::string StringAPI::GetSubstringBetween(std::string text, std::string firstT,
 {
 	unsigned first = text.find(firstT);
 	unsigned last = text.find(lastT);
-	std::string level = text.substr(first, last - first);
-	level = ReplaceAll(level, firstT, "");
+	std::string level;
+	if (first != -1 && last != -1)
+	{
+		level = text.substr(first, last - first);
+		level = ReplaceAll(level, firstT, "");
+	}
     return level;
 }
 

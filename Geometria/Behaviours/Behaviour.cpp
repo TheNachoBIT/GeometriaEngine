@@ -86,11 +86,21 @@ void ScriptBehaviour::StartScript()
 	{
 		if (Application::_engineState == Application::State::Game)
 		{
-			OnStart();
+			if (!_gameStart)
+			{
+				OnStart();
+				_gameStart = true;
+				_editorStart = false;
+			}
 		}
 		else if (isEditor)
 		{
-			OnEditorStart();
+			if (!_editorStart)
+			{
+				OnEditorStart();
+				_editorStart = true;
+				_gameStart = false;
+			}
 		}
 
 		if (ClassType == Class::Script || ClassType == Class::Static)

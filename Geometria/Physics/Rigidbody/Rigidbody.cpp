@@ -54,6 +54,14 @@ void Rigidbody::OnInspector()
 	VisualAccess_Title(Rigidbody);
 }
 
+void Rigidbody::OnSave()
+{
+	SaveInclude(Rigidbody, "Physics/Rigidbody/Rigidbody.h");
+	SaveNewScript(Rigidbody);
+
+	SaveEnd();
+}
+
 void Rigidbody::SetVelocity(Vector3 add)
 {
 	if (boxC != nullptr)

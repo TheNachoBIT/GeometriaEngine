@@ -4,7 +4,6 @@
 #include "../Tools/Tools.h"
 #include "../Files/Scene/SceneFile.h"
 
-#define BEHAVIOUR_H
 struct ScriptBehaviour;
 class Hierarchy
 {
@@ -94,7 +93,7 @@ std::cout << "Saving New Pointer... " << std::endl;\
 SceneSaveAndLoad::isSavePointer = true;\
 SceneSaveAndLoad::objectName = new std::ostringstream();\
 *SceneSaveAndLoad::objectName << #x << scriptId;\
-*SceneSaveAndLoad::allPointers << #x << "* " << SceneSaveAndLoad::objectName->str() << ";" << std::endl;\
+*SceneSaveAndLoad::allPointers << #x << "* " << SceneSaveAndLoad::objectName->str() << " = nullptr;" << std::endl;\
 SceneSaveAndLoad::sceneCppSave << std::endl << "SceneSaveAndLoad::StartLoadArray(\"" << SceneSaveAndLoad::objectName->str() << "\");" << std::endl << SceneSaveAndLoad::objectName->str() << " = new " << #x << "(" << SceneSaveAndLoad::ModifyCode(#__VA_ARGS__) << ");" << std::endl;\
 if(this->objectClassName == "")\
 {\
@@ -125,13 +124,46 @@ else\
 
 #define SaveNewScript(x)\
 std::string _SBSave_##x;\
+std::string _SB_Temp_##x = #x;\
+_SB_Temp_##x += std::to_string(scriptId);\
+_SBSave_##x += _SB_Temp_##x;\
+_SBSave_##x += " = ";\
 _SBSave_##x += "CurrentObject::AddScript<";\
 _SBSave_##x += #x;\
 _SBSave_##x += ">();";\
-SceneSaveAndLoad::sceneCppSave << SceneSaveAndLoad::ModifyCode(_SBSave_##x) << std::endl
+SceneSaveAndLoad::sceneCppSave << SceneSaveAndLoad::ModifyCode(_SBSave_##x) << std::endl;\
+SceneSaveAndLoad::scriptName = _SB_Temp_##x;\
+*SceneSaveAndLoad::allPointers << #x << "* " << SceneSaveAndLoad::scriptName << " = nullptr;" << std::endl\
 
-#define SaveEnd() for(int i = 0; i < scripts.size(); i++) { scripts[i]->OnSave(); }\
-SceneSaveAndLoad::isSavePointer = false; SceneSaveAndLoad::sceneCppSave << "SceneSaveAndLoad::EndLoadArray();" << std::endl
+#define SaveInclude(x, y)\
+std::string includeFile_##x;\
+includeFile_##x += "#include ";\
+includeFile_##x += "\"";\
+includeFile_##x += y;\
+includeFile_##x += "\"";\
+if(SceneSaveAndLoad::allIncludes.find(includeFile_##x) == std::string::npos)\
+{\
+	SceneSaveAndLoad::allIncludes += "#ifndef ";\
+	SceneSaveAndLoad::allIncludes += #x;\
+	SceneSaveAndLoad::allIncludes += "_SCENE\n";\
+	SceneSaveAndLoad::allIncludes += "#define ";\
+	SceneSaveAndLoad::allIncludes += #x;\
+	SceneSaveAndLoad::allIncludes += "_SCENE\n";\
+	SceneSaveAndLoad::allIncludes += includeFile_##x;\
+	SceneSaveAndLoad::allIncludes += "\n";\
+	SceneSaveAndLoad::allIncludes += "#endif\n";\
+}
+
+#define SaveEnd()if(ClassType == Class::Script)\
+{\
+	SceneSaveAndLoad::scriptName = "";\
+}\
+for(int i = 0; i < scripts.size(); i++) { scripts[i]->OnSave(); }\
+SceneSaveAndLoad::isSavePointer = false;\
+if(ClassType != Class::Script)\
+{\
+	SceneSaveAndLoad::sceneCppSave << "SceneSaveAndLoad::EndLoadArray();" << std::endl;\
+}
 
 struct ScriptBehaviour
 {
@@ -165,6 +197,10 @@ struct ScriptBehaviour
 	}
 
 	bool _start = true;
+	bool _gameStart = false;
+	bool _editorStart = false;
+	bool _isCollisionEnter = false;
+	bool _isCollisionExit = false;
 	bool isEnabled = true;
 	bool isBeingDestroyed = false;
 
@@ -230,6 +266,44 @@ struct ScriptBehaviour
 	virtual void OnEditorUpdate() { return; }
 
 	virtual void OnInspector() { return; }
+
+	virtual void OnCollisionEnter() 
+	{
+		if (owner != nullptr && !_isCollisionEnter)
+		{
+			owner->OnCollisionEnter();
+		}
+		else
+		{
+			for (auto i : scripts)
+			{
+				i->_isCollisionEnter = true;
+				i->OnCollisionEnter();
+			}
+		}
+
+		_isCollisionEnter = false;
+		return; 
+	}
+
+	virtual void OnCollisionExit()
+	{
+		if (owner != nullptr && !_isCollisionExit)
+		{
+			owner->OnCollisionExit();
+		}
+		else
+		{
+			for (auto i : scripts)
+			{
+				i->_isCollisionExit = true;
+				i->OnCollisionExit();
+			}
+		}
+
+		_isCollisionExit = false;
+		return;
+	}
 
 	template <typename T>
 	T* AddScript()

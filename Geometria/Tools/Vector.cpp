@@ -529,6 +529,19 @@ Vector3 Vector3::operator/=(const float& A) {
 	z /= A;
 	return *this;
 }
+Vector3 Vector3::Lerp(Vector3 pointA, Vector3 pointB, float time)
+{
+	Vector3 l;
+	l.x = pointA.x + time * (pointB.x - pointA.x);
+	l.y = pointA.y + time * (pointB.y - pointA.y);
+	l.z = pointA.z + time * (pointB.z - pointA.z);
+	return l;
+}
+float Vector3::Magnitude()
+{
+	float calc = sqrt(x * x + y * y + z * z);
+	return calc;
+}
 //==================//
 
 //==[ == OPERATOR ]==//

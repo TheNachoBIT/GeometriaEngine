@@ -24,6 +24,8 @@ struct Rigidbody : public ScriptBehaviour
 	void OnUpdate();
 	void OnInspector();
 
+	void OnSave();
+
 	bool forceChange = false;
 	Transform forcedTransform;
 

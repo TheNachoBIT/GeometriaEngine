@@ -282,6 +282,10 @@ struct Vector3 {
 	static Vector3 back() { return Vector3(0, 0, -1); }
 	static Vector3 front() { return Vector3(0, 0, 1); }
 
+	static Vector3 Lerp(Vector3 pointA, Vector3 pointB, float time);
+
+	float Magnitude();
+
 	static float Distance(Vector3 v1, Vector3 v2) {
 		return sqrt(pow(v2.x - v1.x, 2) + pow(v2.y - v1.y, 2) + pow(v2.z - v1.z, 2));
 	}

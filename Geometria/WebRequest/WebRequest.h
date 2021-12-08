@@ -5,6 +5,7 @@
 #endif
 
 #include "curl/curl.h"
+#include <regex>
 
 class WebTools {
 private:
@@ -78,84 +79,23 @@ struct WebForm {
 struct WebResponse {
 	unsigned int code;
 	float timeElapsed;
-	double downloadProgress, uploadProgress;
 	std::string body, headers, mime, url;
 	bool isDone;
+
+	float progress;
 };
 
 class WebRequest {
 private:
-	void __startRequest(WebForm *form, WebResponse *response) {
-		// Create CURL request
-		CURL *curl = curl_easy_init();
-
-		if (curl) {
-			// Start configuration
-			std::string requestUrl = url;
-			curl_easy_setopt(curl, CURLOPT_MAXREDIRS, (long)maxRedirects);
-			curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, timeout);
-			curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
-			curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, TRUE);
-			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, TRUE);
-			curl_easy_setopt(curl, CURLOPT_AUTOREFERER, TRUE);
-			curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptEncoding.c_str());
-
-			// Pass data
-			std::string curlMethod = MethodToString();
-			curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, (curlMethod == "CURL_DEFAULT" ? NULL : curlMethod.c_str()));
-
-			if (cookies != "")
-				curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
-
-			struct curl_slist *headersList = NULL;
-			headers.ParseToCurlList(headersList, true);
-			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headersList);
-
-			// Prepare URL
-			if (form) {
-				switch (method) {
-					case HttpMethod::HTTP_GET:
-						requestUrl += (requestUrl.find('?') != std::string::npos ? '&' : '?') + form->Parse();
-						break;
-					case HttpMethod::HTTP_POST:
-					case HttpMethod::HTTP_PUT:
-					case HttpMethod::HTTP_DELETE:
-					case HttpMethod::CURL_DEFAULT:
-						curl_easy_setopt(curl, CURLOPT_POSTFIELDS, form->Parse().c_str());
-						break;
-				}
-			}
-			curl_easy_setopt(curl, CURLOPT_URL, requestUrl.c_str());
-
-			// Start CURL tracking and request
-			__callCURL(curl, response);
-
-			curl_slist_free_all(headersList);
-			headersList = NULL;
-		} else  __curlNullPointerResponse(response);
-	}
-
-	static void __startPrimitiveRequest(std::string url, std::string *postData, std::string *cookies, curl_slist *headers, WebResponse *response);
-	static void __callCURL(CURL *curl, WebResponse *response);
-
-	static void __curlNullPointerResponse(WebResponse *response);
-
-	static int __curlProgressCallback(WebResponse *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
-	static size_t __curlWriterCallback(char *buffer, size_t size, size_t nmemb, WebResponse *clientp);
-	static size_t __curlHeaderCallback(char *buffer, size_t size, size_t nitems, WebResponse *clientp);
+	void __startRequest(WebForm* form, WebResponse* response);
 public:
-	enum class HttpMethod { HTTP_GET, HTTP_HEAD, HTTP_POST, HTTP_PUT, HTTP_DELETE, CURL_DEFAULT };
+	enum class HttpMethod { HTTP_GET, HTTP_HEAD, HTTP_POST, HTTP_PUT, HTTP_DELETE };
 
 	std::string url, cookies, acceptEncoding = "";
 	HttpMethod method;
 	WebForm headers;
 	unsigned int status, maxRedirects = 10;
-	unsigned long timeout = 60L;
-
-	WebRequest() {
-		this->url = "";
-		method = HttpMethod::HTTP_GET;
-	}
+	unsigned long maxTime = 60L;
 
 	WebRequest(std::string url) {
 		this->url = url;
@@ -180,31 +120,18 @@ public:
 			case HttpMethod::HTTP_POST: return "POST";
 			case HttpMethod::HTTP_PUT: return "PUT";
 			case HttpMethod::HTTP_DELETE: return "DELETE";
-			case HttpMethod::CURL_DEFAULT: return "CURL_DEFAULT";
 		}
 
 		return "GET";
 	}
 
 	// Starts a web request.
-	void SendRequest(WebResponse* response) {
+	void SendWebRequest(WebResponse* response) {
 		this->__startRequest(NULL, response);
 	}
 
 	// Starts a web request.
-	void SendRequest(WebResponse* response, WebForm form) {
+	void SendWebRequest(WebResponse* response, WebForm form) {
 		this->__startRequest(&form, response);
 	}
-
-	// Starts a web request using all defaults CURL configurations, ignoring all the WebRequest configuration.
-	static void SendPrimitiveRequest(WebResponse *response, std::string url);
-	
-	// Starts a web request using all defaults CURL configurations, ignoring all the WebRequest configuration.
-	static void SendPrimitiveRequest(WebResponse *response, std::string url, std::string postData);
-	
-	// Starts a web request using all defaults CURL configurations, ignoring all the WebRequest configuration.
-	static void SendPrimitiveRequest(WebResponse *response, std::string url, std::string postData, std::string cookies);
-	
-	// Starts a web request using all defaults CURL configurations, ignoring all the WebRequest configuration.
-	static void SendPrimitiveRequest(WebResponse *response, std::string url, std::string postData, std::string cookies, curl_slist *headers);
 };

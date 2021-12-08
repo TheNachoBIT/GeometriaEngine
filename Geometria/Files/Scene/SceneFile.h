@@ -9,6 +9,8 @@ class SceneSaveAndLoad
 public:
 	static std::ostringstream sceneCppSave;
 	static std::ostringstream* objectName, *allPointers;
+	static std::string scriptName;
+	static std::string allIncludes;
 
 	static std::vector<std::pair<std::string, std::ostringstream>> cppStructure, cppStructureEnd;
 

@@ -1,4 +1,5 @@
 #include "PhysicsManager.h"
+#include "../Physics/Colliders/BoxCollider.h"
 
 physx::PxRigidDynamic* dynamicTest;
 
@@ -10,6 +11,8 @@ bool PhysicsManager::preUpdate = true;
 bool PhysicsManager::foundationCreated = false;
 bool PhysicsManager::physicsCreated = false;
 bool PhysicsManager::sceneCreated = false;
+
+PhysicsContactListener PhysicsManager::listener;
 
 Vector3 PhysicsManager::gravity(0, -9.81, 0);
 
@@ -42,7 +45,8 @@ void PhysicsManager::OnStart()
 	sceneDesc.gravity = physx::PxVec3(gravity.x, gravity.y, gravity.z);
 	gDispatcher = physx::PxDefaultCpuDispatcherCreate(2);
 	sceneDesc.cpuDispatcher = gDispatcher;
-	sceneDesc.filterShader = physx::PxDefaultSimulationFilterShader;
+	sceneDesc.filterShader = PhysicsManager::contactReportFilterShader;
+	sceneDesc.simulationEventCallback = &PhysicsManager::listener;
 	gScene = gPhysics->createScene(sceneDesc);
 
 	gMaterial = PhysicsManager::gPhysics->createMaterial(0.5f, 0.5f, 0);
@@ -115,4 +119,59 @@ physx::PxRigidDynamic* PhysicsManager::CreateDynamicBox(Vector3 position, Vector
 	PhysicsManager::allDynamics.push_back(boxDynamic);
 
 	return boxDynamic;
+}
+
+bool PhysicsManager::Raycast(Vector3 origin, Vector3 direction, int maxDistance)
+{
+	physx::PxRaycastBuffer hit;
+	physx::PxVec3 o(origin.x, origin.y, origin.z), d(direction.x, direction.y, direction.z);
+	return PhysicsManager::gScene->raycast(o, d, maxDistance, hit);
+}
+
+physx::PxFilterFlags PhysicsManager::contactReportFilterShader(physx::PxFilterObjectAttributes attributes0, physx::PxFilterData filterData0,
+	physx::PxFilterObjectAttributes attributes1, physx::PxFilterData filterData1,
+	physx::PxPairFlags& pairFlags, const void* constantBlock, physx::PxU32 constantBlockSize)
+{
+	PX_UNUSED(attributes0);
+	PX_UNUSED(attributes1);
+	PX_UNUSED(filterData0);
+	PX_UNUSED(filterData1);
+	PX_UNUSED(constantBlockSize);
+	PX_UNUSED(constantBlock);
+
+	// all initial and persisting reports for everything, with per-point data
+	pairFlags = physx::PxPairFlag::eSOLVE_CONTACT | physx::PxPairFlag::eDETECT_DISCRETE_CONTACT
+		| physx::PxPairFlag::eNOTIFY_TOUCH_FOUND
+		| physx::PxPairFlag::eNOTIFY_TOUCH_LOST
+		| physx::PxPairFlag::eNOTIFY_TOUCH_PERSISTS
+		| physx::PxPairFlag::eNOTIFY_CONTACT_POINTS;
+	return physx::PxFilterFlag::eDEFAULT;
+}
+
+void PhysicsContactListener::onContact(const physx::PxContactPairHeader& pairHeader, const physx::PxContactPair* pairs, physx::PxU32 nbPairs)
+{
+	for (physx::PxU32 i = 0; i < nbPairs; i++)
+	{
+		const physx::PxContactPair& cp = pairs[i];
+
+		ScriptBehaviour* b1 = reinterpret_cast<ScriptBehaviour*>(pairHeader.actors[0]->userData);
+		ScriptBehaviour* b2 = reinterpret_cast<ScriptBehaviour*>(pairHeader.actors[1]->userData);
+
+		if (cp.events & physx::PxPairFlag::eNOTIFY_TOUCH_FOUND)
+		{
+			if (b1 != nullptr)
+				b1->OnCollisionEnter();
+
+			if (b2 != nullptr)
+				b2->OnCollisionEnter();
+		}
+		else if(cp.events & physx::PxPairFlag::eNOTIFY_TOUCH_LOST)
+		{
+			if (b1 != nullptr)
+				b1->OnCollisionExit();
+
+			if (b2 != nullptr)
+				b2->OnCollisionExit();
+		}
+	}
 }
