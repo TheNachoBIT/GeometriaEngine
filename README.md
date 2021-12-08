@@ -31,7 +31,7 @@ Wait for the process to finish and now a .sln will be created in the main folder
 Requirements:
 Run this command in the terminal to make sure you have everything installed:
 
-``sudo apt install make build-essential gcc gcc-multilib g++-multilib libx11-dev libgl1-mesa-dev xorg-dev libglu1-mesa-dev openssl libssl-dev``
+``sudo apt install make build-essential gcc gcc-multilib g++-multilib libx11-dev libgl1-mesa-dev xorg-dev libglu1-mesa-dev openssl libssl-dev libcurl4-openssl-dev``
 
 Once you have everything installed, go to the main folder and type in the terminal:
 
