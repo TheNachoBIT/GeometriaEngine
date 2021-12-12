@@ -12,9 +12,14 @@ struct Files
 	static std::string Replace(const char* oldFile, const char* newFile, bool isBinary);
 	static std::string Replace(const char* oldFile, const char* newFile);
 	static std::string OpenImage(const char* url, int& width, int& height);
+
+	static std::vector<std::string> OpenTexturePack(const char* gtxp);
+
 	static void OpenProgram(const wchar_t* url);
 	static bool Remove(const char* url);
 	static std::vector<unsigned char> GetImageData(const char* url, int& width, int& height);
 	static bool SaveImage(std::string output, std::vector<unsigned char> data, int width, int height);
 	static bool LoadScene(std::string file);
+
+	static std::string GetDirectoryOf(const char* file);
 };

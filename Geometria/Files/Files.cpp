@@ -1,6 +1,8 @@
 #include "Files.h"
 #include "Image/lodepng.h"
 #include "Scene/SceneFile.h"
+#include "nlohmann/json.hpp"
+#include <experimental/filesystem>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -142,4 +144,47 @@ bool Files::LoadScene(std::string file)
     
 
     return true;
+}
+
+std::string Files::GetDirectoryOf(const char* file)
+{
+    std::string fileToString = file;
+    size_t found = fileToString.find_last_of("/\\");
+    return(fileToString.substr(0, found));
+}
+
+std::vector<std::string> Files::OpenTexturePack(const char* gtxp)
+{
+    std::string txpContent = Files::Read(gtxp, true);
+    auto jsonBlocks = nlohmann::json::parse(txpContent);
+    auto entriesArray = jsonBlocks["TexturePack"];
+
+    int total = 0;
+    for (auto i : entriesArray)
+    {
+        std::string n = i["ID"];
+        int currentNumb = std::stoi(n);
+
+        if (total < currentNumb)
+            total = currentNumb;
+    }
+
+    std::vector<std::string> texturePackLinks(total + 1);
+    std::cout << texturePackLinks.size() << std::endl;
+
+    std::string directory = Files::GetDirectoryOf(gtxp);
+
+    for (auto i : entriesArray)
+    {
+        std::string n = i["ID"];
+        int numb = std::stoi(n);
+        std::string imgName = i["Image"];
+
+        texturePackLinks[numb] += directory;
+        texturePackLinks[numb] += "/";
+        texturePackLinks[numb] += imgName;
+        texturePackLinks[numb] += ".png";
+    }
+
+    return texturePackLinks;
 }

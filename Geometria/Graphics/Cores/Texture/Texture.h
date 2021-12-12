@@ -65,6 +65,8 @@ class TextureManager
 {
 public:
 	static std::vector<TextureGroup> textureGroups;
+	static std::vector<Texture*> OpenTexturePack(const char* url);
+	//static std::vector<Texture*> OpenSpriteSheet(const char* url);
 
 	static void ClearRAM()
 	{
